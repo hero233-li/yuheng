@@ -6,23 +6,21 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, '..');
 const desktopDir = path.join(root, 'apps', 'desktop');
-const binDir = path.join(root, 'node_modules', '.bin');
 const env = {
   ...process.env,
   CSC_IDENTITY_AUTO_DISCOVERY: 'false',
 };
 
-function localBin(name) {
-  const filename = process.platform === 'win32' ? `${name}.cmd` : name;
-  const command = path.join(binDir, filename);
+function packageBin(relativePath) {
+  const file = path.join(root, relativePath);
 
-  if (!fs.existsSync(command)) {
-    console.error(`未找到本地命令：${command}`);
+  if (!fs.existsSync(file)) {
+    console.error(`未找到本地脚本：${file}`);
     console.error('请先在项目根目录执行 npm install。');
     process.exit(1);
   }
 
-  return command;
+  return file;
 }
 
 function run(command, args) {
@@ -44,5 +42,9 @@ function run(command, args) {
   }
 }
 
-run(localBin('tsc'), ['-p', 'tsconfig.json']);
-run(localBin('electron-builder'), ['--config', '../../configs/electron.branch.yml']);
+run(process.execPath, [packageBin('node_modules/typescript/bin/tsc'), '-p', 'tsconfig.json']);
+run(process.execPath, [
+  packageBin('node_modules/electron-builder/cli.js'),
+  '--config',
+  '../../configs/electron.branch.yml',
+]);
