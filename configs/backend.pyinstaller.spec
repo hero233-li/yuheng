@@ -4,7 +4,6 @@ from pathlib import Path
 
 ROOT = Path(SPECPATH).parent
 BACKEND = ROOT / "apps" / "backend"
-BACKEND_DIST = ROOT / "dist" / "backend"
 
 a = Analysis(
     [str(BACKEND / "manage.py")],
@@ -33,7 +32,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name=str(BACKEND_DIST / "backend"),
+    name="backend",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

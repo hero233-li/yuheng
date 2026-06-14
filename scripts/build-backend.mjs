@@ -9,9 +9,12 @@ const backendDist = path.join(root, 'dist', 'backend');
 const backendExe = process.platform === 'win32'
   ? path.join(backendDist, 'backend.exe')
   : path.join(backendDist, 'backend');
+const rawBackendExe = path.join(root, 'dist', process.platform === 'win32' ? 'backend.exe' : 'backend');
+const tempBackendExe = path.join(root, 'dist', process.platform === 'win32' ? 'backend.tmp.exe' : 'backend.tmp');
 
 fs.rmSync(backendDist, { recursive: true, force: true });
-fs.rmSync(path.join(root, 'dist', 'backend.exe'), { force: true });
+fs.rmSync(rawBackendExe, { force: true });
+fs.rmSync(tempBackendExe, { force: true });
 
 const result = spawnSync(
   python.command,
@@ -32,8 +35,15 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }
 
+if (!fs.existsSync(backendExe) && fs.existsSync(rawBackendExe)) {
+  fs.renameSync(rawBackendExe, tempBackendExe);
+  fs.mkdirSync(backendDist, { recursive: true });
+  fs.renameSync(tempBackendExe, backendExe);
+}
+
 if (!fs.existsSync(backendExe)) {
   console.error(`后端打包产物不存在：${backendExe}`);
+  console.error(`PyInstaller 默认产物也不存在：${rawBackendExe}`);
   console.error('请检查 PyInstaller 输出日志。');
   process.exit(1);
 }
