@@ -1,0 +1,235 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f5f7fb;
+}
+
+.app-layout {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-sider {
+  height: 100vh;
+  overflow: auto;
+  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.08);
+}
+
+.app-main-layout {
+  height: 100vh;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 18px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 24px;
+  line-height: 1.4;
+  background: #fff;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.app-header-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app-header-title {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.app-header-subtitle {
+  font-size: 13px;
+}
+
+.app-header-user {
+  flex: 0 0 auto;
+}
+
+.app-content {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.app-content-compact {
+  padding: 12px;
+}
+
+.app-content-comfortable {
+  padding: 20px;
+}
+
+.app-tabs {
+  height: 42px;
+  padding: 6px 16px 0;
+  background: #fff;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.settings-panel {
+  max-width: 1200px;
+}
+
+.setting-section {
+  display: grid;
+  gap: 18px;
+}
+
+.setting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.setting-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "label value"
+    "control control";
+  align-items: start;
+  gap: 10px 12px;
+  min-height: 112px;
+  padding: 14px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.setting-item:last-child {
+  border-bottom: 1px solid #edf0f5;
+}
+
+.setting-label {
+  grid-area: label;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.setting-control {
+  grid-area: control;
+  min-width: 0;
+}
+
+.setting-value {
+  grid-area: value;
+  color: rgba(0, 0, 0, 0.45);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stepper-value {
+  min-width: 76px;
+  pointer-events: none;
+}
+
+.app-card-shadow-light .ant-pro-card {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.app-card-shadow-strong .ant-pro-card {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.grouped-status-card {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.grouped-status-card-completed {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.grouped-status-card-pending {
+  background: #fff;
+  border-color: #f0f0f0;
+}
+
+.grouped-card-description {
+  min-height: 22px;
+  margin: 8px 0 4px;
+}
+
+.grouped-task-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.form2-operation-note {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding-top: 22px;
+}
+
+.form-action-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.app-tabs .ant-tabs-nav {
+  margin: 0;
+}
+
+.login-page {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  background: #f5f7fb;
+}
+
+.page-stack {
+  display: grid;
+  gap: var(--page-gap, 16px);
+}
+
+.log-box {
+  height: 280px;
+  overflow: auto;
+  padding: 12px;
+  background: #0f172a;
+  color: #dbeafe;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}

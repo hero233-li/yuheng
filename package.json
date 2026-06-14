@@ -1,0 +1,21 @@
+{
+  "name": "intranet-automation-suite",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web",
+    "apps/desktop"
+  ],
+  "scripts": {
+    "dev:branch": "npm run dev:branch -w apps/web",
+    "dev:branch:all": "node scripts/dev-branch.mjs",
+    "dev:desktop:branch": "npm run dev:branch -w apps/desktop",
+    "build": "npm run build:branch",
+    "build:branch": "npm run build:branch -w apps/web && npm run build:branch -w apps/desktop",
+    "build:backend": "pyinstaller configs/backend.pyinstaller.spec --noconfirm --clean",
+    "build:exe": "npm run build:branch -w apps/web && npm run build:backend && npm run build:branch -w apps/desktop",
+    "backend:branch": "cd apps/backend && APP_MODE=branch python3 manage.py migrate --noinput && APP_MODE=branch python3 manage.py runserver 127.0.0.1:8766",
+    "backend:worker": "cd apps/backend && APP_MODE=branch python3 manage.py migrate --noinput && APP_MODE=branch python3 manage.py runworker",
+    "backend:migrate": "cd apps/backend && python3 manage.py migrate"
+  }
+}

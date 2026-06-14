@@ -1,0 +1,13 @@
+node_modules/
+.venv/
+.idea/
+.DS_Store
+dist/
+data/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+apps/web/dist/
+apps/desktop/dist/
+apps/backend/data/
+apps/backend/**/*.spec

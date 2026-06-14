@@ -1,0 +1,16 @@
+appId: com.intranet.automation.branch
+productName: 内网自动化工具
+directories:
+  output: ../../dist/branch
+files:
+  - apps/desktop/dist/**
+  - apps/desktop/index.js
+extraResources:
+  - from: ../../apps/web/dist/branch
+    to: web/branch
+  - from: ../../dist/backend
+    to: backend
+win:
+  target:
+    - portable
+artifactName: intranet-automation-${version}.${ext}

@@ -1,0 +1,20 @@
+{
+  "name": "@automation/desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev:branch": "APP_MODE=branch electron .",
+    "build:branch": "tsc -p tsconfig.json && electron-builder --config ../../configs/electron.branch.yml"
+  },
+  "dependencies": {
+    "electron-is-dev": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "33.2.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.7.2"
+  }
+}
