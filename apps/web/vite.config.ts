@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    base: mode === 'branch' ? './' : '/',
     define: {
       __APP_MODE__: JSON.stringify(env.APP_MODE || 'branch'),
     },
