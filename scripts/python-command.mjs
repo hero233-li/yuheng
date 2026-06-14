@@ -42,22 +42,26 @@ export function getPythonCommand() {
 }
 
 export function assertPython310(command, args = []) {
-  const result = spawnSync(command, [...args, '-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'], {
+  const result = spawnSync(command, [...args, '-c', 'import sys; print(str(sys.version_info.major) + "." + str(sys.version_info.minor))'], {
     encoding: 'utf-8',
-    shell: process.platform === 'win32',
+    shell: false,
   });
-  const version = result.stdout.trim();
+  const version = (result.stdout || '').trim();
+  const error = (result.stderr || '').trim();
   if (result.status !== 0 || version !== '3.10') {
     console.error(`当前 Python 版本不是 3.10：${version || '无法识别'}`);
+    if (error) {
+      console.error(error);
+    }
     console.error('请使用 Python 3.10 重新创建虚拟环境并安装依赖。');
     process.exit(1);
   }
 }
 
 function isPython310(command, args) {
-  const result = spawnSync(command, [...args, '-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'], {
+  const result = spawnSync(command, [...args, '-c', 'import sys; print(str(sys.version_info.major) + "." + str(sys.version_info.minor))'], {
     encoding: 'utf-8',
-    shell: process.platform === 'win32',
+    shell: false,
   });
-  return result.status === 0 && result.stdout.trim() === '3.10';
+  return result.status === 0 && (result.stdout || '').trim() === '3.10';
 }
