@@ -28,8 +28,10 @@ Electron 桌面壳
 
 ```text
 Node.js 20+
-Python 3.10+
+Python 3.10
 ```
+
+注意：后端固定使用 Python 3.10。不要用 3.11、3.12 或 3.13 创建虚拟环境。
 
 ## 安装依赖
 
@@ -37,7 +39,7 @@ Python 3.10+
 
 ```bat
 npm install
-python -m venv .venv
+py -3.10 -m venv .venv
 .venv\Scripts\activate
 pip install -r apps/backend/requirements.txt
 ```
@@ -46,14 +48,15 @@ pip install -r apps/backend/requirements.txt
 
 ```bash
 npm install
-python3 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 pip install -r apps/backend/requirements.txt
 ```
 
-如果你的系统只有 `python` 没有 `python3`，也可以用：
+如果你的系统只有 `python`，先确认它是 3.10：
 
 ```bash
+python --version
 python -m venv .venv
 ```
 
@@ -133,11 +136,13 @@ scripts/python-command.mjs
 它会自动选择：
 
 ```text
-Windows: python
-macOS/Linux: python3，找不到时 fallback 到 python
+优先使用项目 .venv 里的 Python
+Windows: py -3.10，或 PYTHON 指定的解释器
+macOS/Linux: python3.10，或 PYTHON 指定的解释器
 ```
 
 也会用 Node 注入环境变量，不再依赖 `APP_MODE=branch ...` 这种 shell 语法。
+如果检测到 Python 不是 3.10，脚本会直接报错。
 
 ## 打包后的运行逻辑
 
@@ -157,7 +162,7 @@ Electron 启动
 
 ### 1. python 命令找不到
 
-安装 Python 时勾选：
+安装 Python 3.10 时勾选：
 
 ```text
 Add python.exe to PATH
@@ -167,6 +172,12 @@ Add python.exe to PATH
 
 ```bat
 python --version
+```
+
+必须显示 `3.10.x`。如果电脑上有多个 Python，使用：
+
+```bat
+py -3.10 --version
 ```
 
 ### 2. pyinstaller 找不到
@@ -205,7 +216,7 @@ npm install
 `.venv` 不会提交到 Git，拉下来后必须重新创建：
 
 ```bat
-python -m venv .venv
+py -3.10 -m venv .venv
 .venv\Scripts\activate
 pip install -r apps/backend/requirements.txt
 ```
@@ -219,4 +230,3 @@ npm run build:exe
 ```
 
 然后把新产物发给使用者即可。
-

@@ -10,7 +10,13 @@ let backendProcess: ChildProcessWithoutNullStreams | undefined;
 let workerProcess: ChildProcessWithoutNullStreams | undefined;
 
 function pythonCommand() {
-  return process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  if (process.env.PYTHON) {
+    return { command: process.env.PYTHON, args: [] };
+  }
+  if (process.platform === 'win32') {
+    return { command: 'py', args: ['-3.10'] };
+  }
+  return { command: 'python3.10', args: [] };
 }
 
 function backendCwd() {
@@ -32,7 +38,8 @@ function startPythonProcess(args: string[]) {
     return spawn(path.join(backendCwd(), executable), args, { cwd: backendCwd(), env });
   }
 
-  return spawn(pythonCommand(), ['manage.py', ...args], {
+  const python = pythonCommand();
+  return spawn(python.command, [...python.args, 'manage.py', ...args], {
     cwd: backendCwd(),
     env,
     shell: process.platform === 'win32',
@@ -55,7 +62,8 @@ function runBackendCommand(args: string[]) {
     });
   }
 
-  return spawnSync(pythonCommand(), ['manage.py', ...args], {
+  const python = pythonCommand();
+  return spawnSync(python.command, [...python.args, 'manage.py', ...args], {
     cwd: backendCwd(),
     env,
     stdio: 'ignore',

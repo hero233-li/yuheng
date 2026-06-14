@@ -13,7 +13,7 @@ const env = {
 };
 
 function runSync(args) {
-  const result = spawnSync(python, ['manage.py', ...args], {
+  const result = spawnSync(python.command, [...python.args, 'manage.py', ...args], {
     cwd: backendCwd,
     env,
     stdio: 'inherit',
@@ -25,7 +25,7 @@ function runSync(args) {
 }
 
 function runLong(args) {
-  const child = spawn(python, ['manage.py', ...args], {
+  const child = spawn(python.command, [...python.args, 'manage.py', ...args], {
     cwd: backendCwd,
     env,
     stdio: 'inherit',
@@ -46,4 +46,3 @@ if (action === 'migrate') {
   console.error(`Unknown backend action: ${action}`);
   process.exit(1);
 }
-

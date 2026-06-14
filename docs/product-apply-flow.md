@@ -451,6 +451,8 @@ STAGE_CHOICES = [
 npm run backend:migrate
 ```
 
+后端固定使用 Python 3.10。Windows 上请用 `py -3.10 -m venv .venv` 创建虚拟环境，macOS/Linux 上请用 `python3.10 -m venv .venv`。
+
 第三处：`apps/backend/jobs/serializers.py`
 
 把新阶段加入 `stage_steps`：

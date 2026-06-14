@@ -3,8 +3,8 @@ import { getPythonCommand } from './python-command.mjs';
 
 const python = getPythonCommand();
 const result = spawnSync(
-  python,
-  ['-m', 'PyInstaller', 'configs/backend.pyinstaller.spec', '--noconfirm', '--clean'],
+  python.command,
+  [...python.args, '-m', 'PyInstaller', 'configs/backend.pyinstaller.spec', '--noconfirm', '--clean'],
   {
     cwd: process.cwd(),
     stdio: 'inherit',

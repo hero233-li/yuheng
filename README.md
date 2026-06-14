@@ -6,7 +6,7 @@
 
 - 前端：React + TypeScript + Vite + Ant Design / Ant Design Pro Components
 - 桌面壳：Electron
-- 后端：Python + Django + SQLite
+- 后端：Python 3.10 + Django + SQLite
 - 任务执行：本机 SQLite 任务表 + 本地 worker 串行执行
 - 数据存储：保存在本机，不依赖总机或服务器
 - 更新方式：手动重新打包 exe，然后发给使用者覆盖新版
@@ -17,7 +17,7 @@
 
 ```bash
 npm install
-python3 -m venv .venv
+python3.10 -m venv .venv
 . .venv/bin/activate
 pip install -r apps/backend/requirements.txt
 npm run backend:migrate
