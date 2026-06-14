@@ -12,6 +12,7 @@ extraResources:
   - from: ../../dist/backend
     to: backend
 win:
+  signAndEditExecutable: false
   target:
     - portable
 mac:

@@ -205,7 +205,26 @@ pip install -r apps/backend/requirements.txt
 2. 或配置 npm / Electron 镜像
 ```
 
-### 4. 拉 Git 后 node_modules 没有
+### 4. Windows 提示 Cannot create symbolic link
+
+如果打包时出现类似下面的错误：
+
+```text
+ERROR: Cannot create symbolic link : 客户端没有所需的特权
+```
+
+这是 electron-builder 解压签名工具缓存时触发的 Windows 符号链接权限问题。本项目默认关闭 Windows 签名和可执行文件资源编辑，用于生成内网 portable 包。
+
+拉取最新代码后建议删除旧缓存再重新打包：
+
+```powershell
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"
+npm run build:exe
+```
+
+如果仍然报同类错误，可以开启 Windows 开发者模式，或用管理员身份打开 PowerShell 后再打包。
+
+### 5. 拉 Git 后 node_modules 没有
 
 `node_modules` 不会提交到 Git，拉下来后必须执行：
 
@@ -213,7 +232,7 @@ pip install -r apps/backend/requirements.txt
 npm install
 ```
 
-### 5. 拉 Git 后 .venv 没有
+### 6. 拉 Git 后 .venv 没有
 
 `.venv` 不会提交到 Git，拉下来后必须重新创建：
 
