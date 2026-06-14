@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-ROOT = Path(SPECPATH).parent.parent
+ROOT = Path(SPECPATH).parent
 BACKEND = ROOT / "apps" / "backend"
 
 a = Analysis(
