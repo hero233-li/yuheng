@@ -26,12 +26,22 @@ function backendCwd() {
   return path.resolve(__dirname, '../../backend');
 }
 
-function startPythonProcess(args: string[]) {
-  const env = {
+function backendEnv() {
+  const env: NodeJS.ProcessEnv = {
     ...process.env,
     APP_MODE: 'branch',
     PYTHONUNBUFFERED: '1',
   };
+
+  if (app.isPackaged) {
+    env.AUTOMATION_DATA_DIR = path.join(app.getPath('userData'), 'data', 'branch');
+  }
+
+  return env;
+}
+
+function startPythonProcess(args: string[]) {
+  const env = backendEnv();
 
   if (app.isPackaged) {
     const executable = process.platform === 'win32' ? 'backend.exe' : 'backend';
@@ -47,11 +57,7 @@ function startPythonProcess(args: string[]) {
 }
 
 function runBackendCommand(args: string[]) {
-  const env = {
-    ...process.env,
-    APP_MODE: 'branch',
-    PYTHONUNBUFFERED: '1',
-  };
+  const env = backendEnv();
 
   if (app.isPackaged) {
     const executable = process.platform === 'win32' ? 'backend.exe' : 'backend';

@@ -1,9 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = Path(SPECPATH).parent
 BACKEND = ROOT / "apps" / "backend"
+DJANGO_MIGRATIONS = (
+    collect_submodules("core.migrations")
+    + collect_submodules("jobs.migrations")
+)
 
 a = Analysis(
     [str(BACKEND / "manage.py")],
@@ -17,6 +22,7 @@ a = Analysis(
         "jobs",
         "workflows",
         "corsheaders",
+        *DJANGO_MIGRATIONS,
     ],
     hookspath=[],
     hooksconfig={},
