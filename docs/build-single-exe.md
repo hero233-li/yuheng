@@ -97,6 +97,8 @@ npm run build:exe
    使用 electron-builder 构建桌面应用
 ```
 
+不要直接跳过 `npm run build:backend` 去执行 `npm run build:desktop`，否则 electron-builder 会找不到 `dist/backend`。
+
 ## 产物位置
 
 产物目录：
