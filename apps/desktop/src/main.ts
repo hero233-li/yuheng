@@ -9,6 +9,10 @@ const backendPort = 8766;
 let backendProcess: ChildProcessWithoutNullStreams | undefined;
 let workerProcess: ChildProcessWithoutNullStreams | undefined;
 
+function pythonCommand() {
+  return process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+}
+
 function backendCwd() {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, 'backend');
@@ -28,7 +32,11 @@ function startPythonProcess(args: string[]) {
     return spawn(path.join(backendCwd(), executable), args, { cwd: backendCwd(), env });
   }
 
-  return spawn('python3', ['manage.py', ...args], { cwd: backendCwd(), env });
+  return spawn(pythonCommand(), ['manage.py', ...args], {
+    cwd: backendCwd(),
+    env,
+    shell: process.platform === 'win32',
+  });
 }
 
 function runBackendCommand(args: string[]) {
@@ -47,10 +55,11 @@ function runBackendCommand(args: string[]) {
     });
   }
 
-  return spawnSync('python3', ['manage.py', ...args], {
+  return spawnSync(pythonCommand(), ['manage.py', ...args], {
     cwd: backendCwd(),
     env,
     stdio: 'ignore',
+    shell: process.platform === 'win32',
   });
 }
 

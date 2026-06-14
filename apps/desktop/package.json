@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/main.js",
   "scripts": {
-    "dev:branch": "APP_MODE=branch electron .",
+    "dev:branch": "electron .",
     "build:branch": "tsc -p tsconfig.json && electron-builder --config ../../configs/electron.branch.yml"
   },
   "dependencies": {

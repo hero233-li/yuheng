@@ -1,6 +1,6 @@
-# 单机版 exe 打包说明
+# 单机版跨平台打包说明
 
-当前架构已经收敛为“单机本地运行”：
+当前架构是单机本地运行：
 
 ```text
 Electron 桌面壳
@@ -10,82 +10,138 @@ Electron 桌面壳
   -> SQLite 数据保存在本机
 ```
 
-没有总机、没有远程升级、没有版本包管理。更新方式是你重新打包一个 exe，手动发给使用者。
+没有总机、没有远程升级、没有版本包管理。更新方式是重新打包，然后把新产物发给使用者。
 
-## 打包产物
+## 支持平台
 
-Windows 打包完成后会生成：
+| 平台 | 建议产物 | 说明 |
+| --- | --- | --- |
+| Windows | `.exe` | 推荐在 Windows 机器上打包 |
+| macOS | `.app` / `.dmg` | 推荐在 macOS 机器上打包 |
+| Linux | `AppImage` | 推荐在 Linux 机器上打包 |
 
-```text
-dist/branch/intranet-automation-0.1.0.exe
-```
+原则：在哪个平台运行打包命令，就优先产出该平台的包。
 
-这个文件是 portable exe：
+## 安装环境
 
-```text
-不需要安装
-不需要服务器
-双击运行
-```
-
-## Windows 打包步骤
-
-建议在 Windows x64 电脑上打包，因为最终目标是 Windows exe。
-
-### 1. 安装环境
-
-安装：
+三端都需要：
 
 ```text
 Node.js 20+
 Python 3.10+
 ```
 
-### 2. 安装依赖
+## 安装依赖
 
-在项目根目录执行：
+### Windows
 
-```bash
+```bat
 npm install
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r apps/backend/requirements.txt
 ```
 
-### 3. 打包
+### macOS / Linux
 
-在项目根目录执行：
+```bash
+npm install
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r apps/backend/requirements.txt
+```
+
+如果你的系统只有 `python` 没有 `python3`，也可以用：
+
+```bash
+python -m venv .venv
+```
+
+## 开发启动
+
+三端统一执行：
+
+```bash
+npm run dev:branch:all
+```
+
+这个命令会同时启动：
+
+```text
+Django API: http://127.0.0.1:8766
+本地 worker
+前端 Vite: http://127.0.0.1:5174
+```
+
+## 打包
+
+三端统一执行：
 
 ```bash
 npm run build:exe
 ```
 
-这个命令会做三件事：
+这个命令会按顺序执行：
 
 ```text
-1. npm run build:branch -w apps/web
+1. npm run build:web
    构建 React 静态资源
 
 2. npm run build:backend
-   使用 PyInstaller 构建 Django 后端 backend.exe
+   使用 PyInstaller 构建本平台后端可执行文件
 
-3. npm run build:branch -w apps/desktop
-   使用 electron-builder 生成最终 portable exe
+3. npm run build:desktop
+   使用 electron-builder 构建桌面应用
 ```
 
-### 4. 发送给别人
+## 产物位置
 
-把这个文件发给别人：
+产物目录：
 
 ```text
-dist/branch/intranet-automation-0.1.0.exe
+dist/branch/
 ```
 
-对方双击即可运行。
+常见产物：
+
+```text
+Windows: dist/branch/intranet-automation-0.1.0.exe
+macOS:   dist/branch/内网自动化工具-0.1.0.dmg 或 .app
+Linux:   dist/branch/内网自动化工具-0.1.0.AppImage
+```
+
+最终文件名会受 electron-builder 当前平台和配置影响，以 `dist/branch/` 里的实际文件为准。
+
+## 为什么之前 Windows 不能跑
+
+旧脚本里有这种写法：
+
+```bash
+APP_MODE=branch python3 manage.py runserver
+```
+
+这是 macOS/Linux shell 写法，Windows cmd/PowerShell 不支持。
+
+现在已经改成跨平台 Node 脚本：
+
+```text
+scripts/backend-command.mjs
+scripts/build-backend.mjs
+scripts/python-command.mjs
+```
+
+它会自动选择：
+
+```text
+Windows: python
+macOS/Linux: python3，找不到时 fallback 到 python
+```
+
+也会用 Node 注入环境变量，不再依赖 `APP_MODE=branch ...` 这种 shell 语法。
 
 ## 打包后的运行逻辑
 
-用户双击 exe 后：
+用户双击应用后：
 
 ```text
 Electron 启动
@@ -95,55 +151,66 @@ Electron 启动
   -> 打开内置页面
 ```
 
-用户看不到命令行窗口。
+用户不需要手动启动前端或后端。
 
-## 本机数据位置
+## Windows 常见问题
 
-Django 默认数据目录：
+### 1. python 命令找不到
 
-```text
-apps/backend/data/branch
-```
-
-打包后建议后续改成用户目录，例如：
+安装 Python 时勾选：
 
 ```text
-%APPDATA%\IntranetAutomation\data
+Add python.exe to PATH
 ```
 
-当前版本先保持项目内默认数据目录，后续如果要让升级覆盖 exe 时保留数据，再把 `AUTOMATION_DATA_DIR` 固定到用户目录。
+然后重新打开终端，执行：
 
-## 常见问题
+```bat
+python --version
+```
 
-### 1. npm run build:backend 提示 pyinstaller 找不到
+### 2. pyinstaller 找不到
 
-确认已经激活虚拟环境，并安装依赖：
+先激活虚拟环境：
+
+```bat
+.venv\Scripts\activate
+```
+
+再安装依赖：
+
+```bat
+pip install -r apps/backend/requirements.txt
+```
+
+### 3. electron-builder 下载失败
+
+首次打包需要下载 Electron 运行时。内网环境可能失败，建议：
+
+```text
+1. 在能联网的机器先打一次包
+2. 或配置 npm / Electron 镜像
+```
+
+### 4. 拉 Git 后 node_modules 没有
+
+`node_modules` 不会提交到 Git，拉下来后必须执行：
 
 ```bash
+npm install
+```
+
+### 5. 拉 Git 后 .venv 没有
+
+`.venv` 不会提交到 Git，拉下来后必须重新创建：
+
+```bat
+python -m venv .venv
 .venv\Scripts\activate
 pip install -r apps/backend/requirements.txt
 ```
 
-### 2. electron-builder 下载失败
-
-首次打包需要下载 Electron 运行时。内网环境可能失败，建议在能联网的机器先打一次包，或配置 npm/electron 镜像。
-
-### 3. 打包后双击没反应
-
-先在开发环境确认：
-
-```bash
-npm run dev:branch:all
-```
-
-如果开发环境正常，再检查：
-
-```text
-dist/backend/backend.exe 是否存在
-apps/web/dist/branch/index.html 是否存在
-```
-
-### 4. 要更新版本怎么办
+## 更新版本
 
 修改代码后重新执行：
 
@@ -151,5 +218,5 @@ apps/web/dist/branch/index.html 是否存在
 npm run build:exe
 ```
 
-把新的 exe 发给别人即可。
+然后把新产物发给使用者即可。
 

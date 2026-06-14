@@ -448,9 +448,7 @@ STAGE_CHOICES = [
 第二处：生成数据库迁移：
 
 ```bash
-cd apps/backend
-python3 manage.py makemigrations
-python3 manage.py migrate
+npm run backend:migrate
 ```
 
 第三处：`apps/backend/jobs/serializers.py`
@@ -528,4 +526,3 @@ return {
 产品、字段、联动关系优先改 searchFormConfig.ts。
 真实自动化流程优先改 workflows/registry.py。
 ```
-

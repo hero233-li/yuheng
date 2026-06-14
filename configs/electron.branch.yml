@@ -13,4 +13,11 @@ extraResources:
 win:
   target:
     - portable
-artifactName: intranet-automation-${version}.${ext}
+mac:
+  target:
+    - dmg
+    - zip
+linux:
+  target:
+    - AppImage
+artifactName: intranet-automation-${version}-${os}-${arch}.${ext}
