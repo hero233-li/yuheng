@@ -80,7 +80,7 @@ function runBackendCommand(args: string[]) {
 function startBackend() {
   runBackendCommand(['migrate', '--noinput']);
 
-  backendProcess = startPythonProcess(['runserver', `127.0.0.1:${backendPort}`]);
+  backendProcess = startPythonProcess(['runserver', `127.0.0.1:${backendPort}`, '--noreload']);
   workerProcess = startPythonProcess(['runworker']);
 }
 
