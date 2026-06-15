@@ -122,6 +122,8 @@ SQLite 数据目录：
 apps/backend/data/web/db.sqlite3
 ```
 
+菜单访问、接口调用、任务记录都保存在 SQLite 中，项目重启后不会清空。
+
 ## 文档导航
 
 建议按这个顺序阅读：

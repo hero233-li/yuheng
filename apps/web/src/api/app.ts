@@ -204,3 +204,62 @@ export async function returnGroupedTask() {
   const { data } = await apiClient.post('/mock/grouped-task/return/');
   return data as GroupedTaskState;
 }
+
+export interface InvocationRecordDto {
+  id: number;
+  record_type: 'menu' | 'api';
+  record_type_label: string;
+  name: string;
+  path: string;
+  method: string;
+  status_code?: number | null;
+  success: boolean;
+  duration_ms: number;
+  detail: string;
+  created_at: string;
+}
+
+export interface InvocationSummaryPayload {
+  summary: {
+    total: number;
+    today: number;
+    menu_total: number;
+    api_total: number;
+    api_success_rate: number;
+    avg_duration_ms: number;
+  };
+  period_stats: {
+    day: number;
+    week: number;
+    month: number;
+    year: number;
+  };
+  menu_stats: Array<{
+    name: string;
+    count: number;
+    rate: number;
+  }>;
+  daily_stats: Array<{
+    date: string;
+    count: number;
+  }>;
+  records: InvocationRecordDto[];
+}
+
+export async function recordInvocation(payload: {
+  record_type: 'menu' | 'api';
+  name: string;
+  path?: string;
+  method?: string;
+  success?: boolean;
+  duration_ms?: number;
+  detail?: string;
+}) {
+  const { data } = await apiClient.post<InvocationRecordDto>('/invocations/', payload);
+  return data;
+}
+
+export async function getInvocationSummary() {
+  const { data } = await apiClient.get<InvocationSummaryPayload>('/invocations/summary/');
+  return data;
+}

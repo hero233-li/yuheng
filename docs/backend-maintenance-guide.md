@@ -76,6 +76,39 @@ apps/backend/automation_backend/urls.py
 
 ## 模型
 
+### InvocationRecord
+
+位置：
+
+```text
+apps/backend/core/models.py
+```
+
+用途：
+
+```text
+保存菜单访问和接口调用记录，用于历史调用记录页面。
+```
+
+写入来源：
+
+| 来源 | 说明 |
+| --- | --- |
+| 前端菜单访问 | `POST /api/invocations/` |
+| 后端 API 调用 | `core.middleware.InvocationRecordMiddleware` 自动写入 |
+
+核心字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `record_type` | `menu` 或 `api` |
+| `name` | 菜单名称或接口名称 |
+| `path` | 菜单路径或接口路径 |
+| `method` | API 方法 |
+| `status_code` | API 状态码 |
+| `success` | 是否成功 |
+| `duration_ms` | 接口耗时 |
+
 ### Job
 
 位置：

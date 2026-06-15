@@ -15,6 +15,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import { useAppPreferences } from '../stores/appPreferences';
+import { recordInvocation } from '../api/app';
 
 const { Header, Sider, Content } = Layout;
 
@@ -50,7 +51,7 @@ const menuItems: AppMenuItem[] = [
     label: '一级菜单三',
     children: [
       { key: '/multi-task-table', icon: <BarsOutlined />, label: '多维任务表格' },
-      { key: '/personal-center', icon: <HistoryOutlined />, label: '个人中心' },
+      { key: '/personal-center', icon: <HistoryOutlined />, label: '历史调用记录' },
       { key: '/system-settings', icon: <SettingOutlined />, label: '系统设置' },
     ],
   },
@@ -102,6 +103,18 @@ export function AppShell() {
       return [...current, nextTab];
     });
   }, [activeTabKey, currentMenu, tabs]);
+
+  useEffect(() => {
+    if (!currentMenu) {
+      return;
+    }
+    recordInvocation({
+      record_type: 'menu',
+      name: currentMenu.label,
+      path: currentMenu.key,
+      detail: '菜单访问',
+    }).catch(() => undefined);
+  }, [currentMenu]);
 
   function openMenu(path: string) {
     const target = flatMenuItems.find((item) => item.key === path);

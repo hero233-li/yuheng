@@ -1,13 +1,17 @@
 import json
 import os
-from datetime import datetime
+from collections import Counter
+from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.db.models import Avg
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from core.models import InvocationRecord
 from jobs.models import Job
 
 CURRENT_VERSION = os.environ.get("APP_VERSION", "0.1.0")
@@ -15,6 +19,107 @@ CURRENT_VERSION = os.environ.get("APP_VERSION", "0.1.0")
 
 def health(request):
     return JsonResponse({"ok": True, "mode": settings.APP_MODE, "version": CURRENT_VERSION})
+
+
+def _serialize_invocation(record):
+    return {
+        "id": record.id,
+        "record_type": record.record_type,
+        "record_type_label": dict(InvocationRecord.TYPE_CHOICES).get(record.record_type, record.record_type),
+        "name": record.name,
+        "path": record.path,
+        "method": record.method,
+        "status_code": record.status_code,
+        "success": record.success,
+        "duration_ms": record.duration_ms,
+        "detail": record.detail,
+        "created_at": timezone.localtime(record.created_at).strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
+def _date_key(created_at):
+    return timezone.localtime(created_at).strftime("%Y-%m-%d")
+
+
+def _period_start(period):
+    now = timezone.now()
+    if period == "day":
+        return now - timedelta(days=1)
+    if period == "week":
+        return now - timedelta(days=7)
+    if period == "month":
+        return now - timedelta(days=30)
+    if period == "year":
+        return now - timedelta(days=365)
+    return now - timedelta(days=7)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def invocations_view(request):
+    if request.method == "POST":
+        payload = json.loads(request.body or "{}")
+        record_type = payload.get("record_type") or InvocationRecord.TYPE_MENU
+        if record_type not in {InvocationRecord.TYPE_MENU, InvocationRecord.TYPE_API}:
+            return JsonResponse({"detail": "record_type 不正确"}, status=400)
+        record = InvocationRecord.objects.create(
+            record_type=record_type,
+            name=str(payload.get("name") or "未知调用")[:120],
+            path=str(payload.get("path") or "")[:300],
+            method=str(payload.get("method") or "")[:20],
+            success=bool(payload.get("success", True)),
+            duration_ms=int(payload.get("duration_ms") or 0),
+            detail=str(payload.get("detail") or ""),
+        )
+        return JsonResponse(_serialize_invocation(record))
+
+    records = InvocationRecord.objects.all()[:100]
+    return JsonResponse({"records": [_serialize_invocation(record) for record in records]})
+
+
+def invocations_summary(request):
+    records = list(InvocationRecord.objects.all())
+    api_records = [record for record in records if record.record_type == InvocationRecord.TYPE_API]
+    menu_records = [record for record in records if record.record_type == InvocationRecord.TYPE_MENU]
+    today = timezone.localdate()
+    today_records = [record for record in records if timezone.localtime(record.created_at).date() == today]
+    success_count = len([record for record in api_records if record.success])
+    success_rate = round(success_count / len(api_records) * 100, 2) if api_records else 100
+    avg_duration = InvocationRecord.objects.filter(record_type=InvocationRecord.TYPE_API).aggregate(value=Avg("duration_ms"))["value"] or 0
+
+    menu_counter = Counter(record.name for record in menu_records)
+    daily_counter = Counter(_date_key(record.created_at) for record in records)
+    period_stats = {
+        period: InvocationRecord.objects.filter(created_at__gte=_period_start(period)).count()
+        for period in ["day", "week", "month", "year"]
+    }
+
+    return JsonResponse(
+        {
+            "summary": {
+                "total": len(records),
+                "today": len(today_records),
+                "menu_total": len(menu_records),
+                "api_total": len(api_records),
+                "api_success_rate": success_rate,
+                "avg_duration_ms": round(avg_duration, 2),
+            },
+            "period_stats": period_stats,
+            "menu_stats": [
+                {
+                    "name": name,
+                    "count": count,
+                    "rate": round(count / len(menu_records) * 100, 2) if menu_records else 0,
+                }
+                for name, count in menu_counter.most_common()
+            ],
+            "daily_stats": [
+                {"date": key, "count": daily_counter[key]}
+                for key in sorted(daily_counter.keys())[-14:]
+            ],
+            "records": [_serialize_invocation(record) for record in InvocationRecord.objects.all()[:100]],
+        }
+    )
 
 
 GROUPED_CARD_MOCK = [

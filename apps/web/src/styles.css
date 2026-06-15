@@ -216,6 +216,60 @@ body {
   min-width: 120px;
 }
 
+.analysis-stat-card {
+  width: 220px;
+}
+
+.period-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.period-stat-item {
+  padding: 12px 14px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.period-stat-item .ant-typography {
+  margin: 0;
+}
+
+.daily-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  min-height: 180px;
+  overflow-x: auto;
+  padding-top: 10px;
+}
+
+.daily-chart-item {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 42px;
+}
+
+.daily-chart-bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  height: 124px;
+}
+
+.daily-chart-bar {
+  width: 22px;
+  border-radius: 4px 4px 0 0;
+  background: #1677ff;
+}
+
+.daily-chart-count,
+.daily-chart-label {
+  font-size: 12px;
+}
+
 .log-box {
   height: 280px;
   overflow: auto;
