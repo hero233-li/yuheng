@@ -6,6 +6,7 @@ import { useAppPreferences } from '../../stores/appPreferences';
 const menuSettings = [
   { path: '/product-apply', label: '产品申请' },
   { path: '/search-form-2', label: '数据维护' },
+  { path: '/reset-password', label: '重置密码' },
   { path: '/multi-task-table', label: '多维任务表格' },
   { path: '/card-search', label: '卡片式搜索表单' },
   { path: '/grouped-card-search', label: '分组卡片搜索表单' },

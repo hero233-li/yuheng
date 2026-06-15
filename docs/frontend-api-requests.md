@@ -93,6 +93,8 @@ apps/web/src/api/app.ts
 | `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 数据维护配置 |
 | `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 分组卡片搜索 |
 
+重置密码页面不需要新增专用 API，前端直接调用 `createJob` 创建 `reset_password` 异步任务，再轮询 `getJob` 展示进度。
+
 ## 页面调用方式
 
 查询接口使用 TanStack Query：

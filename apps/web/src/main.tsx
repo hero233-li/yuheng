@@ -16,6 +16,7 @@ import { CardSearchPage } from './apps/web/CardSearchPage';
 import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
 import { GroupedCardSearchPage } from './apps/web/GroupedCardSearchPage';
 import { SearchForm2Page } from './apps/web/SearchForm2Page';
+import { ResetPasswordPage } from './apps/web/ResetPasswordPage';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const appRoutes = [
       { index: true, element: <Navigate to="/product-apply" replace /> },
       { path: 'product-apply', element: <JobCreatePage /> },
       { path: 'search-form-2', element: <SearchForm2Page /> },
+      { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
       { path: 'jobs', element: <JobListPage /> },
       { path: 'personal-center', element: <PersonalCenterPage /> },

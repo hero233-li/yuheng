@@ -492,6 +492,8 @@ export const pageAFields = [
 | 页面 | 文件 | 结果形式 |
 | --- | --- | --- |
 | 产品申请 | `JobCreatePage.tsx` | 表格 + Drawer 详情 + 日志 |
+| 数据维护 | `SearchForm2Page.tsx` | 表单 + 执行进度 |
+| 重置密码 | `ResetPasswordPage.tsx` | 简单表单 + 执行进度 |
 | 多维任务表格 | `MultiTaskTablePage.tsx` | 多维表格 |
 | 卡片式搜索表单 | `CardSearchPage.tsx` | 卡片列表 |
 | 个人中心 | `PersonalCenterPage.tsx` | 历史记录列表 |

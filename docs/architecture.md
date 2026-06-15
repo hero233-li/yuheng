@@ -179,6 +179,14 @@ worker 按 workflow 分发
 前端轮询 Job 状态
 ```
 
+当前示例 workflow：
+
+| workflow | 页面 |
+| --- | --- |
+| `product_apply` | 产品申请 |
+| `search_form_2` | 数据维护 |
+| `reset_password` | 重置密码 |
+
 新增纯前端配置页面：
 
 ```text

@@ -55,6 +55,8 @@ const defaultPreferences = {
   cardShadow: 'none' as CardShadow,
   menuTabModes: {
     '/product-apply': 'single' as MenuTabMode,
+    '/search-form-2': 'single' as MenuTabMode,
+    '/reset-password': 'single' as MenuTabMode,
     '/multi-task-table': 'single' as MenuTabMode,
     '/card-search': 'single' as MenuTabMode,
     '/grouped-card-search': 'single' as MenuTabMode,

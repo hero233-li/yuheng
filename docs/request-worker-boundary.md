@@ -43,6 +43,7 @@ worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
 | --- | --- | --- |
 | 产品申请 | `POST /api/jobs/` | `product_apply` |
 | 数据维护执行 | `POST /api/jobs/` | `search_form_2` |
+| 重置密码 | `POST /api/jobs/` | `reset_password` |
 
 前端创建任务后不等待业务执行完成，只拿到 `job_id`：
 

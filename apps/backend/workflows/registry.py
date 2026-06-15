@@ -9,6 +9,8 @@ def run_workflow(job):
     workflow = job.payload.get("workflow") or "product_apply"
     if workflow == "search_form_2":
         return run_search_form_2_workflow(job)
+    if workflow == "reset_password":
+        return run_reset_password_workflow(job)
     return run_product_apply_workflow(job)
 
 
@@ -125,6 +127,50 @@ def run_search_form_2_workflow(job):
         },
         "rows": rows,
         "export_url": f"/api/mock/search-form-2/results/{job.id}/export/",
+    }
+
+
+def run_reset_password_workflow(job):
+    parsed_payload = _parse_payload(job.payload.get("biz_payload"))
+    environment = parsed_payload.get("environment")
+    environment_label = parsed_payload.get("environmentLabel") or environment
+    username = parsed_payload.get("username") or ""
+
+    steps = [
+        ("读取重置密码参数", f"环境：{environment_label}，用户名：{username}"),
+        ("校验用户信息", "Mock 用户信息校验通过"),
+        ("执行密码重置", "Mock 密码已重置为默认规则"),
+        ("写入处理结果", "Mock 重置密码结果已保存"),
+    ]
+
+    JobLog.objects.create(job=job, message="重置密码异步流程开始")
+    job.total_steps = len(steps)
+    job.save(update_fields=["total_steps"])
+
+    for index, (step_name, message) in enumerate(steps, start=1):
+        if index == 1:
+            job.stage = job.STAGE_STEP_1
+        elif index == 2:
+            job.stage = job.STAGE_STEP_2
+        else:
+            job.stage = job.STAGE_EXECUTING
+        job.current_step = index
+        job.progress = min(95, 15 + int(index / len(steps) * 75))
+        job.save(update_fields=["stage", "current_step", "progress"])
+        JobLog.objects.create(job=job, message=f"[{step_name}] {message}")
+        time.sleep(1)
+
+    job.stage = job.STAGE_COMPLETED
+    job.progress = 98
+    job.save(update_fields=["stage", "progress"])
+    JobLog.objects.create(job=job, message="[写入重置密码结果] 结果已保存到任务记录")
+
+    return {
+        "ok": True,
+        "workflow": "reset_password",
+        "environment": environment,
+        "username": username,
+        "summary": f"{environment_label} 用户 {username} 的密码已完成 Mock 重置",
     }
 
 

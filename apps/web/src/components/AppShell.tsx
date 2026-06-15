@@ -33,6 +33,7 @@ const menuItems: AppMenuItem[] = [
     children: [
       { key: '/product-apply', icon: <PlayCircleOutlined />, label: '产品申请' },
       { key: '/search-form-2', icon: <PlayCircleOutlined />, label: '数据维护' },
+      { key: '/reset-password', icon: <PlayCircleOutlined />, label: '重置密码' },
     ],
   },
   {
