@@ -41,7 +41,6 @@ const menuItems: AppMenuItem[] = [
     icon: <MenuOutlined />,
     label: '一级菜单二',
     children: [
-      { key: '/multi-task-table', icon: <BarsOutlined />, label: '多维任务表格' },
       { key: '/card-search', icon: <AppstoreOutlined />, label: '卡片式搜索表单' },
       { key: '/grouped-card-search', icon: <AppstoreOutlined />, label: '分组卡片搜索表单' },
     ],
@@ -51,6 +50,7 @@ const menuItems: AppMenuItem[] = [
     icon: <SettingOutlined />,
     label: '一级菜单三',
     children: [
+      { key: '/multi-task-table', icon: <BarsOutlined />, label: '多维任务表格' },
       { key: '/menu-three/overview', label: '菜单三页面' },
       { key: '/personal-center', icon: <HistoryOutlined />, label: '个人中心' },
       { key: '/system-settings', icon: <SettingOutlined />, label: '系统设置' },
