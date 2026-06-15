@@ -383,12 +383,6 @@ apps/web/src/apps/web/MultiTaskTablePage.tsx
 
 适合截图里那种卡片墙。
 
-参考：
-
-```text
-apps/web/src/apps/web/CardSearchPage.tsx
-```
-
 使用：
 
 ```tsx
@@ -495,7 +489,6 @@ export const pageAFields = [
 | 数据维护 | `SearchForm2Page.tsx` | 表单 + 执行进度 |
 | 重置密码 | `ResetPasswordPage.tsx` | 简单表单 + 执行进度 |
 | 多维任务表格 | `MultiTaskTablePage.tsx` | 多维表格 |
-| 卡片式搜索表单 | `CardSearchPage.tsx` | 卡片列表 |
 | 卡片任务 | `GroupedCardSearchPage.tsx` | 分组卡片任务 |
 | 个人中心 | `PersonalCenterPage.tsx` | 历史记录列表 |
 

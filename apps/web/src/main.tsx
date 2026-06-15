@@ -12,7 +12,6 @@ import { JobListPage } from './apps/web/JobListPage';
 import { SettingsPage } from './apps/web/SettingsPage';
 import { PlaceholderPage } from './apps/web/PlaceholderPage';
 import { MultiTaskTablePage } from './apps/web/MultiTaskTablePage';
-import { CardSearchPage } from './apps/web/CardSearchPage';
 import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
 import { GroupedCardSearchPage } from './apps/web/GroupedCardSearchPage';
 import { SearchForm2Page } from './apps/web/SearchForm2Page';
@@ -33,7 +32,6 @@ const appRoutes = [
       { path: 'jobs', element: <JobListPage /> },
       { path: 'personal-center', element: <PersonalCenterPage /> },
       { path: 'multi-task-table', element: <MultiTaskTablePage /> },
-      { path: 'card-search', element: <CardSearchPage /> },
       { path: 'grouped-card-search', element: <GroupedCardSearchPage /> },
       { path: 'menu-two/overview', element: <Navigate to="/multi-task-table" replace /> },
       { path: 'menu-three/overview', element: <PlaceholderPage title="菜单三页面" /> },

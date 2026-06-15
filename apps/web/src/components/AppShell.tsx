@@ -41,7 +41,6 @@ const menuItems: AppMenuItem[] = [
     icon: <MenuOutlined />,
     label: '一级菜单二',
     children: [
-      { key: '/card-search', icon: <AppstoreOutlined />, label: '卡片式搜索表单' },
       { key: '/grouped-card-search', icon: <AppstoreOutlined />, label: '卡片任务' },
     ],
   },
