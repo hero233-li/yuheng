@@ -3,19 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "apps/web",
-    "apps/desktop"
+    "apps/web"
   ],
   "scripts": {
+    "dev": "npm run dev:network",
+    "dev:network": "node scripts/dev-network.mjs",
     "dev:branch": "npm run dev:branch -w apps/web",
-    "dev:branch:all": "node scripts/dev-branch.mjs",
-    "dev:desktop:branch": "npm run dev:branch -w apps/desktop",
-    "build": "npm run build:exe",
-    "build:branch": "npm run build:exe",
+    "dev:branch:all": "node scripts/dev-network.mjs",
+    "build": "npm run build:web",
+    "build:branch": "npm run build:web",
     "build:web": "npm run build:branch -w apps/web",
     "build:backend": "node scripts/build-backend.mjs",
-    "build:desktop": "npm run build:branch -w apps/desktop",
-    "build:exe": "npm run build:web && npm run build:backend && npm run build:desktop",
     "backend:branch": "node scripts/backend-command.mjs runserver",
     "backend:worker": "node scripts/backend-command.mjs runworker",
     "backend:migrate": "node scripts/backend-command.mjs migrate"

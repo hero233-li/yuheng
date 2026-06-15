@@ -11,8 +11,14 @@ export default defineConfig(({ mode }) => {
       __APP_MODE__: JSON.stringify(env.APP_MODE || 'branch'),
     },
     server: {
-      host: '127.0.0.1',
+      host: env.WEB_HOST || '0.0.0.0',
       port: 5174,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8766',
+          changeOrigin: true,
+        },
+      },
     },
   };
 });
