@@ -6,9 +6,9 @@
 
 | 位置 | 作用 |
 | --- | --- |
-| `apps/web/src/apps/branch/JobCreatePage.tsx` | 产品申请页面，负责渲染表单、提交任务、展示执行结果 |
-| `apps/web/src/apps/branch/searchFormConfig.ts` | 产品申请表单配置，维护环境、产品、产地、地区、城市、字段规则 |
-| `apps/web/src/api/branch.ts` | 分机前端 API 封装，包含 `createJob`、`getJob`、`getJobLogs` |
+| `apps/web/src/apps/web/JobCreatePage.tsx` | 产品申请页面，负责渲染表单、提交任务、展示执行结果 |
+| `apps/web/src/apps/web/searchFormConfig.ts` | 产品申请表单配置，维护环境、产品、产地、地区、城市、字段规则 |
+| `apps/web/src/api/app.ts` | 终端前端 API 封装，包含 `createJob`、`getJob`、`getJobLogs` |
 | `apps/backend/jobs/views.py` | job 创建、查询、日志查询接口 |
 | `apps/backend/jobs/models.py` | Job、JobLog 数据模型，定义任务状态和阶段 |
 | `apps/backend/jobs/serializers.py` | Job 返回给前端的数据结构，包括进度步骤 |
@@ -42,7 +42,7 @@ buildSearchConfig(watchedValues)
 配置文件：
 
 ```text
-apps/web/src/apps/branch/searchFormConfig.ts
+apps/web/src/apps/web/searchFormConfig.ts
 ```
 
 核心配置：
@@ -289,7 +289,7 @@ getJobLogs(selectedJobId)
 如果新增的是所有产品都有的公共字段，改：
 
 ```text
-apps/web/src/apps/branch/searchFormConfig.ts
+apps/web/src/apps/web/searchFormConfig.ts
 ```
 
 在 `commonFields` 里追加：
@@ -474,7 +474,7 @@ job.save(update_fields=["stage", "progress"])
 如果前端要给新状态不同颜色，才需要改：
 
 ```text
-apps/web/src/apps/branch/JobCreatePage.tsx
+apps/web/src/apps/web/JobCreatePage.tsx
 ```
 
 在 `stageColor` 里补颜色映射。

@@ -10,7 +10,7 @@ const backendHost = process.env.BACKEND_HOST || '0.0.0.0';
 const backendPort = process.env.BACKEND_PORT || '8766';
 const env = {
   ...process.env,
-  APP_MODE: 'branch',
+  APP_MODE: 'web',
   PYTHONUNBUFFERED: '1',
 };
 

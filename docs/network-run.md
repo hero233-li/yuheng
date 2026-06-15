@@ -11,7 +11,7 @@ Django API 后端：8766
 SQLite：本机数据文件
 ```
 
-不再优先使用 Electron，也不再把项目打成桌面 exe。
+项目采用 React 前端和 Python 后端分离运行。
 
 ## 版本
 
@@ -135,7 +135,7 @@ npm run dev
 只启动后端：
 
 ```bash
-npm run backend:branch
+npm run backend:web
 ```
 
 只启动 worker：
@@ -147,7 +147,7 @@ npm run backend:worker
 只启动前端：
 
 ```bash
-npm run dev:branch
+npm run dev:web
 ```
 
 ## 构建前端
@@ -159,5 +159,5 @@ npm run build
 构建产物：
 
 ```text
-apps/web/dist/branch/
+apps/web/dist/web/
 ```

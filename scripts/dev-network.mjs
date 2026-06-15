@@ -2,9 +2,9 @@ import { spawn } from 'node:child_process';
 
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const commands = [
-  ['backend', [npm, ['run', 'backend:branch']]],
+  ['backend', [npm, ['run', 'backend:web']]],
   ['worker', [npm, ['run', 'backend:worker']]],
-  ['web', [npm, ['run', 'dev:branch']]],
+  ['web', [npm, ['run', 'dev:web']]],
 ];
 
 const children = [];

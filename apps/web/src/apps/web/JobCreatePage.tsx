@@ -19,7 +19,7 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
-import { createJob, getJob, getJobLogs, listJobs } from '../../api/branch';
+import { createJob, getJob, getJobLogs, listJobs } from '../../api/app';
 import type { Job, JobLog, JobStage, JobStatus } from '../../types';
 import {
   buildSearchConfig,

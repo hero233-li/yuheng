@@ -2,7 +2,7 @@ import { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-co
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, ColorPicker, Descriptions, Radio, Space, Tabs, Tag, Typography } from 'antd';
 import type { ReactNode } from 'react';
-import { getSettings, updateSettings } from '../../api/branch';
+import { getSettings, updateSettings } from '../../api/app';
 import { useAppPreferences } from '../../stores/appPreferences';
 
 const menuSettings = [
@@ -16,7 +16,7 @@ const menuSettings = [
   { path: '/system-settings', label: '系统设置' },
 ];
 
-export function BranchSettingsPage() {
+export function SettingsPage() {
   const { message } = App.useApp();
   const {
     themeMode,
@@ -80,8 +80,8 @@ export function BranchSettingsPage() {
                       return true;
                     }}
                   >
-                    <ProFormText name="machine_name" label="分机名称" />
-                    <ProFormText name="branch_name" label="登录分机名" tooltip="密码默认等于当前分机名" />
+                    <ProFormText name="machine_name" label="终端名称" />
+                    <ProFormText name="terminal_name" label="登录终端名" tooltip="密码默认等于当前终端名" />
                   </ProForm>
                 </ProCard>
               </div>

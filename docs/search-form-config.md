@@ -3,13 +3,13 @@
 配置文件：
 
 ```text
-apps/web/src/apps/branch/searchFormConfig.ts
+apps/web/src/apps/web/searchFormConfig.ts
 ```
 
 页面文件：
 
 ```text
-apps/web/src/apps/branch/JobCreatePage.tsx
+apps/web/src/apps/web/JobCreatePage.tsx
 ```
 
 一般只改配置文件。页面文件负责渲染、提交、结果展示。

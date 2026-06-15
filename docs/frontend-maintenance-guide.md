@@ -16,7 +16,7 @@ apps/web/src
 | --- | --- |
 | `apps/web/src/main.tsx` | 路由入口 |
 | `apps/web/src/components/AppShell.tsx` | 左侧菜单、顶部导航、页签、面包屑、头像 |
-| `apps/web/src/apps/branch/` | 本机页面 |
+| `apps/web/src/apps/web/` | 本机页面 |
 | `apps/web/src/api/` | 前端请求后端接口 |
 | `apps/web/src/stores/` | 前端状态，如登录、外观、菜单配置 |
 | `apps/web/src/types/` | 前端类型定义 |
@@ -30,7 +30,7 @@ apps/web/src
 例如：
 
 ```text
-apps/web/src/apps/branch/PageA.tsx
+apps/web/src/apps/web/PageA.tsx
 ```
 
 示例：
@@ -60,10 +60,10 @@ apps/web/src/main.tsx
 导入页面：
 
 ```ts
-import { PageA } from './apps/branch/PageA';
+import { PageA } from './apps/web/PageA';
 ```
 
-在 `branchRoutes` 里添加：
+在 `appRoutes` 里添加：
 
 ```ts
 { path: 'page-a', element: <PageA /> }
@@ -128,7 +128,7 @@ multi：每次点击可以打开 页面A-1 / 页面A-2
 如果希望系统设置里可以配置这个菜单，还要改：
 
 ```text
-apps/web/src/apps/branch/BranchSettingsPage.tsx
+apps/web/src/apps/web/SettingsPage.tsx
 ```
 
 在 `menuSettings` 里加：
@@ -148,7 +148,7 @@ apps/web/src/api/
 本机接口：
 
 ```text
-apps/web/src/api/branch.ts
+apps/web/src/api/app.ts
 ```
 
 ### 示例：新增页面 A 的查询接口
@@ -159,7 +159,7 @@ apps/web/src/api/branch.ts
 GET /api/page-a/items/
 ```
 
-前端在 `branch.ts` 中添加：
+前端在 `app.ts` 中添加：
 
 ```ts
 export async function listPageAItems() {
@@ -172,7 +172,7 @@ export async function listPageAItems() {
 
 ```tsx
 import { useQuery } from '@tanstack/react-query';
-import { listPageAItems } from '../../api/branch';
+import { listPageAItems } from '../../api/app';
 
 const query = useQuery({
   queryKey: ['page-a-items'],
@@ -213,7 +213,7 @@ const mutation = useMutation({
 当前“执行产品申请流程”的字段配置在：
 
 ```text
-apps/web/src/apps/branch/searchFormConfig.ts
+apps/web/src/apps/web/searchFormConfig.ts
 ```
 
 如果是公共字段，改：
@@ -278,8 +278,8 @@ fieldOverrides: {
 参考：
 
 ```text
-apps/web/src/apps/branch/JobCreatePage.tsx
-apps/web/src/apps/branch/searchFormConfig.ts
+apps/web/src/apps/web/JobCreatePage.tsx
+apps/web/src/apps/web/searchFormConfig.ts
 ```
 
 字段由配置生成：
@@ -363,7 +363,7 @@ export function PageA() {
 参考：
 
 ```text
-apps/web/src/apps/branch/MultiTaskTablePage.tsx
+apps/web/src/apps/web/MultiTaskTablePage.tsx
 ```
 
 使用：
@@ -384,7 +384,7 @@ apps/web/src/apps/branch/MultiTaskTablePage.tsx
 参考：
 
 ```text
-apps/web/src/apps/branch/CardSearchPage.tsx
+apps/web/src/apps/web/CardSearchPage.tsx
 ```
 
 使用：
@@ -459,7 +459,7 @@ Drawer
 字段很多时建议新建独立配置文件：
 
 ```text
-apps/web/src/apps/branch/pageAConfig.ts
+apps/web/src/apps/web/pageAConfig.ts
 ```
 
 例如：
@@ -499,7 +499,7 @@ export const pageAFields = [
 接口请求统一写在：
 
 ```text
-apps/web/src/api/branch.ts
+apps/web/src/api/app.ts
 ```
 
 不要在页面里直接写：
@@ -511,7 +511,7 @@ axios.get(...)
 推荐：
 
 ```ts
-// api/branch.ts
+// api/app.ts
 export async function queryPageA(payload: Record<string, unknown>) {
   const { data } = await apiClient.post('/page-a/query/', payload);
   return data;
@@ -537,7 +537,7 @@ docs/frontend-api-requests.md
 修改前端后建议运行：
 
 ```bash
-npm run build:branch -w apps/web
+npm run build -w apps/web
 ```
 
-打包 exe 前也会自动执行这一步。
+构建前端时会执行这一步。

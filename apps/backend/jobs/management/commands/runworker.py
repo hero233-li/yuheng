@@ -10,7 +10,7 @@ from workflows.registry import run_workflow
 
 
 class Command(BaseCommand):
-    help = "Run the local serial job worker for branch mode."
+    help = "Run the local serial job worker for web mode."
 
     def handle(self, *args, **options):
         self._running = True

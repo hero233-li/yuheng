@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev:branch": "vite --mode branch",
-    "build:branch": "tsc -b && vite build --mode branch --outDir dist/branch",
-    "preview:branch": "vite preview --outDir dist/branch"
+    "dev": "vite --mode web",
+    "build": "tsc -b && vite build --mode web --outDir dist/web",
+    "preview": "vite preview --outDir dist/web"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",

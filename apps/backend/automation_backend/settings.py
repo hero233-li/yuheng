@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-APP_MODE = os.environ.get("APP_MODE", "branch")
+APP_MODE = os.environ.get("APP_MODE", "web")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-before-release")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"

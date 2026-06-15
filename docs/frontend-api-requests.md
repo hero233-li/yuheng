@@ -4,7 +4,7 @@
 
 ```text
 apps/web/src/api/client.ts
-apps/web/src/api/branch.ts
+apps/web/src/api/app.ts
 ```
 
 ## 请求基础地址
@@ -12,7 +12,7 @@ apps/web/src/api/branch.ts
 前端环境变量：
 
 ```text
-apps/web/.env.branch
+apps/web/.env.web
 ```
 
 当前配置：
@@ -42,7 +42,7 @@ export const apiClient = axios.create({
 本机接口在：
 
 ```text
-apps/web/src/api/branch.ts
+apps/web/src/api/app.ts
 ```
 
 当前主要方法：
@@ -71,10 +71,10 @@ export async function login(payload: { username: string; password: string }) {
 
 ```text
 用户名：user
-密码：fj001
+密码：terminal001
 ```
 
-密码默认等于当前分机名。
+密码默认等于当前终端名。
 
 例如提交搜索任务：
 
@@ -136,7 +136,7 @@ mutation.mutate(buildSubmitPayload(values));
 POST /api/jobs/{id}/retry/
 ```
 
-前端在 `apps/web/src/api/branch.ts` 添加：
+前端在 `apps/web/src/api/app.ts` 添加：
 
 ```ts
 export async function retryJob(jobId: string) {
@@ -162,7 +162,7 @@ Django 路由在：
 apps/backend/automation_backend/urls.py
 ```
 
-分机任务接口在：
+终端任务接口在：
 
 ```text
 apps/backend/jobs/views.py
@@ -179,7 +179,7 @@ apps/backend/core/views.py
 搜索页面提交的数据由：
 
 ```text
-apps/web/src/apps/branch/JobCreatePage.tsx
+apps/web/src/apps/web/JobCreatePage.tsx
 ```
 
 里的 `buildSubmitPayload(values)` 生成。

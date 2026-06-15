@@ -3,7 +3,7 @@ import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useMutation } from '@tanstack/react-query';
 import { App, Typography } from 'antd';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { login } from '../../api/branch';
+import { login } from '../../api/app';
 import { useAuthStore } from '../../stores/authStore';
 
 export function LoginPage() {
@@ -13,7 +13,7 @@ export function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      auth.login({ username: data.username, branchName: data.branch_name });
+      auth.login({ username: data.username, terminalName: data.terminal_name });
       message.success('登录成功');
       navigate('/product-apply', { replace: true });
     },
@@ -27,9 +27,9 @@ export function LoginPage() {
   return (
     <div className="login-page">
       <LoginForm
-        title="内网自动化分机"
-        subTitle="默认账号 user / fj001"
-        initialValues={{ username: 'user', password: 'fj001' }}
+        title="内网自动化系统"
+        subTitle="默认账号 user / terminal001"
+        initialValues={{ username: 'user', password: 'terminal001' }}
         onFinish={async (values) => {
           await loginMutation.mutateAsync({
             username: String(values.username || ''),
@@ -51,7 +51,7 @@ export function LoginPage() {
           placeholder="密码"
           rules={[{ required: true, message: '请输入密码' }]}
         />
-        <Typography.Text type="secondary">密码默认等于当前分机名。</Typography.Text>
+        <Typography.Text type="secondary">密码默认等于当前终端名。</Typography.Text>
       </LoginForm>
     </div>
   );

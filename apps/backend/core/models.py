@@ -27,7 +27,7 @@ class Setting(models.Model):
 class LocalAccount(models.Model):
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=200)
-    branch_name = models.CharField(max_length=100, default="fj001")
+    terminal_name = models.CharField(max_length=100, default="terminal001")
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -35,6 +35,6 @@ class LocalAccount(models.Model):
     def ensure_default(cls):
         account, _ = cls.objects.get_or_create(
             username="user",
-            defaults={"password": "fj001", "branch_name": "fj001"},
+            defaults={"password": "terminal001", "terminal_name": "terminal001"},
         )
         return account

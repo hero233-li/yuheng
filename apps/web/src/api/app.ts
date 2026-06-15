@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 import type { Job, JobLog, LoginResult, Settings } from '../types';
 
-export async function getBranchHealth() {
+export async function getHealth() {
   const { data } = await apiClient.get('/health/');
   return data;
 }

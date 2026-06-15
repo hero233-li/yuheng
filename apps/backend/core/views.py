@@ -334,12 +334,12 @@ def grouped_task_return(request):
 def _settings_payload():
     account = LocalAccount.ensure_default()
     machine_id = Setting.get_value("machine_id", default_machine_id())
-    machine_name = Setting.get_value("machine_name", account.branch_name or "fj001")
+    machine_name = Setting.get_value("machine_name", account.terminal_name or "terminal001")
     return {
         "machine_id": machine_id,
         "machine_name": machine_name,
         "username": account.username,
-        "branch_name": account.branch_name,
+        "terminal_name": account.terminal_name,
         "version": CURRENT_VERSION,
     }
 
@@ -354,12 +354,12 @@ def settings_view(request):
     for key in ["machine_name"]:
         if key in payload:
             Setting.set_value(key, str(payload[key]))
-    if "branch_name" in payload:
+    if "terminal_name" in payload:
         account = LocalAccount.ensure_default()
-        account.branch_name = str(payload["branch_name"] or "fj001")
-        account.password = account.branch_name
-        account.save(update_fields=["branch_name", "password", "updated_at"])
-        Setting.set_value("machine_name", account.branch_name)
+        account.terminal_name = str(payload["terminal_name"] or "terminal001")
+        account.password = account.terminal_name
+        account.save(update_fields=["terminal_name", "password", "updated_at"])
+        Setting.set_value("machine_name", account.terminal_name)
     return JsonResponse(_settings_payload())
 
 
@@ -382,7 +382,7 @@ def login(request):
         {
             "ok": True,
             "username": account.username,
-            "branch_name": account.branch_name,
-            "machine_name": account.branch_name,
+            "terminal_name": account.terminal_name,
+            "machine_name": account.terminal_name,
         }
     )

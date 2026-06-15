@@ -1,6 +1,6 @@
 # 内网自动化工具
 
-本仓库当前采用“前后端分离 + 本机内网服务”架构，不再优先维护 Electron 桌面壳。
+本仓库当前采用“React 前端 + Python/Django 后端”的前后端分离架构。
 
 - 前端：React + TypeScript + Vite + Ant Design / Ant Design Pro Components
 - 后端：Python 3.10 + Django + SQLite
@@ -67,7 +67,7 @@ npm run build
 产物在：
 
 ```text
-apps/web/dist/branch/
+apps/web/dist/web/
 ```
 
 ## 文档
@@ -84,7 +84,7 @@ docs/network-run.md
 docs/product-apply-flow.md
 ```
 
-分机端搜索表单字段、联动关系、宽度、默认值、是否可编辑和是否提交：
+搜索表单字段、联动关系、宽度、默认值、是否可编辑和是否提交：
 
 ```text
 docs/search-form-config.md

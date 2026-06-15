@@ -2,9 +2,9 @@ import { create } from 'zustand';
 
 interface AuthState {
   username?: string;
-  branchName?: string;
+  terminalName?: string;
   isLoggedIn: boolean;
-  login: (payload: { username: string; branchName: string }) => void;
+  login: (payload: { username: string; terminalName: string }) => void;
   logout: () => void;
 }
 
@@ -19,7 +19,7 @@ function readAuth() {
     const parsed = JSON.parse(raw);
     return {
       username: parsed.username,
-      branchName: parsed.branchName,
+      terminalName: parsed.terminalName || parsed.terminalName,
       isLoggedIn: Boolean(parsed.username),
     };
   } catch {
@@ -29,12 +29,12 @@ function readAuth() {
 
 export const useAuthStore = create<AuthState>((set) => ({
   ...readAuth(),
-  login: ({ username, branchName }) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ username, branchName }));
-    set({ username, branchName, isLoggedIn: true });
+  login: ({ username, terminalName }) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ username, terminalName }));
+    set({ username, terminalName, isLoggedIn: true });
   },
   logout: () => {
     localStorage.removeItem(STORAGE_KEY);
-    set({ username: undefined, branchName: undefined, isLoggedIn: false });
+    set({ username: undefined, terminalName: undefined, isLoggedIn: false });
   },
 }));

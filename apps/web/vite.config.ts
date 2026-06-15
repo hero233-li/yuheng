@@ -6,9 +6,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    base: mode === 'branch' ? './' : '/',
+    base: mode === 'web' ? './' : '/',
     define: {
-      __APP_MODE__: JSON.stringify(env.APP_MODE || 'branch'),
+      __APP_MODE__: JSON.stringify(env.APP_MODE || 'web'),
     },
     server: {
       host: env.WEB_HOST || '0.0.0.0',

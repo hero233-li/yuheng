@@ -7,21 +7,21 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
-import { JobCreatePage } from './apps/branch/JobCreatePage';
-import { JobListPage } from './apps/branch/JobListPage';
-import { BranchSettingsPage } from './apps/branch/BranchSettingsPage';
-import { PlaceholderPage } from './apps/branch/PlaceholderPage';
-import { LoginPage } from './apps/branch/LoginPage';
+import { JobCreatePage } from './apps/web/JobCreatePage';
+import { JobListPage } from './apps/web/JobListPage';
+import { SettingsPage } from './apps/web/SettingsPage';
+import { PlaceholderPage } from './apps/web/PlaceholderPage';
+import { LoginPage } from './apps/web/LoginPage';
 import { RequireAuth } from './components/RequireAuth';
-import { MultiTaskTablePage } from './apps/branch/MultiTaskTablePage';
-import { CardSearchPage } from './apps/branch/CardSearchPage';
-import { PersonalCenterPage } from './apps/branch/PersonalCenterPage';
-import { GroupedCardSearchPage } from './apps/branch/GroupedCardSearchPage';
-import { SearchForm2Page } from './apps/branch/SearchForm2Page';
+import { MultiTaskTablePage } from './apps/web/MultiTaskTablePage';
+import { CardSearchPage } from './apps/web/CardSearchPage';
+import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
+import { GroupedCardSearchPage } from './apps/web/GroupedCardSearchPage';
+import { SearchForm2Page } from './apps/web/SearchForm2Page';
 
 const queryClient = new QueryClient();
 
-const branchRoutes = [
+const appRoutes = [
   { path: '/login', element: <LoginPage /> },
   {
     path: '/',
@@ -42,7 +42,7 @@ const branchRoutes = [
           { path: 'grouped-card-search', element: <GroupedCardSearchPage /> },
           { path: 'menu-two/overview', element: <Navigate to="/multi-task-table" replace /> },
           { path: 'menu-three/overview', element: <PlaceholderPage title="菜单三页面" /> },
-          { path: 'system-settings', element: <BranchSettingsPage /> },
+          { path: 'system-settings', element: <SettingsPage /> },
           { path: 'settings', element: <Navigate to="/system-settings" replace /> },
         ],
       },
@@ -50,7 +50,7 @@ const branchRoutes = [
   },
 ];
 
-const router = createHashRouter(branchRoutes);
+const router = createHashRouter(appRoutes);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

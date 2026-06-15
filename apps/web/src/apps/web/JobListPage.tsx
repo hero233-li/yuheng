@@ -2,7 +2,7 @@ import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Descriptions, Drawer, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { getJobLogs, listJobs } from '../../api/branch';
+import { getJobLogs, listJobs } from '../../api/app';
 import { useState } from 'react';
 import type { Job, JobLog, JobStatus } from '../../types';
 

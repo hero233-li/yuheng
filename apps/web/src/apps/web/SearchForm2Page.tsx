@@ -11,7 +11,7 @@ import {
   type SearchForm2FieldConfig,
   type SearchForm2Result,
   type SearchForm2ResultRow,
-} from '../../api/branch';
+} from '../../api/app';
 
 export function SearchForm2Page() {
   const [form] = Form.useForm();

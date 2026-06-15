@@ -78,7 +78,7 @@ export function AppShell() {
     menuTabModes,
     setSiderCollapsed,
   } = useAppPreferences();
-  const { username, branchName, logout } = useAuthStore();
+  const { username, terminalName, logout } = useAuthStore();
   const [tabs, setTabs] = useState<Array<{ key: string; path: string; label: string }>>([]);
   const [activeTabKey, setActiveTabKey] = useState('');
   const flatMenuItems = useMemo(() => flattenMenu(menuItems), [menuItems]);
@@ -195,8 +195,8 @@ export function AppShell() {
             >
               <Button type="text" className="app-header-user">
                 <Space>
-                  <Avatar size="small">{branchName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
-                  <span>{branchName || username || 'fj001'}</span>
+                  <Avatar size="small">{terminalName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
+                  <span>{terminalName || username || 'terminal001'}</span>
                 </Space>
               </Button>
             </Dropdown>

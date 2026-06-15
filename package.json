@@ -8,13 +8,10 @@
   "scripts": {
     "dev": "npm run dev:network",
     "dev:network": "node scripts/dev-network.mjs",
-    "dev:branch": "npm run dev:branch -w apps/web",
-    "dev:branch:all": "node scripts/dev-network.mjs",
+    "dev:web": "npm run dev -w apps/web",
     "build": "npm run build:web",
-    "build:branch": "npm run build:web",
-    "build:web": "npm run build:branch -w apps/web",
-    "build:backend": "node scripts/build-backend.mjs",
-    "backend:branch": "node scripts/backend-command.mjs runserver",
+    "build:web": "npm run build -w apps/web",
+    "backend:web": "node scripts/backend-command.mjs runserver",
     "backend:worker": "node scripts/backend-command.mjs runworker",
     "backend:migrate": "node scripts/backend-command.mjs migrate"
   }

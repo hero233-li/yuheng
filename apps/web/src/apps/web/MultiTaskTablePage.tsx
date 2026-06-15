@@ -17,7 +17,7 @@ import {
   type MultiTaskSubTaskDto,
   type MultiTaskSubTaskPayload,
   type MultiTaskTablePayload,
-} from '../../api/branch';
+} from '../../api/app';
 import { useAppPreferences } from '../../stores/appPreferences';
 
 const emptySummary = { applyCount: 0, patchCount: 0, approveCount: 0, completed: 0 };

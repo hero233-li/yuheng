@@ -2,11 +2,11 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { useQuery } from '@tanstack/react-query';
 import { Avatar, Button, Descriptions, List, Progress, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { listJobs } from '../../api/branch';
+import { listJobs } from '../../api/app';
 import { useAuthStore } from '../../stores/authStore';
 
 export function PersonalCenterPage() {
-  const { username, branchName } = useAuthStore();
+  const { username, terminalName } = useAuthStore();
   const jobsQuery = useQuery({ queryKey: ['jobs'], queryFn: listJobs, refetchInterval: 3000 });
 
   return (
@@ -14,9 +14,9 @@ export function PersonalCenterPage() {
       <div className="page-stack">
         <ProCard>
           <Space size={16}>
-            <Avatar size={64}>{branchName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
+            <Avatar size={64}>{terminalName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
             <div>
-              <Typography.Title level={4} style={{ margin: 0 }}>{branchName || 'fj001'}</Typography.Title>
+              <Typography.Title level={4} style={{ margin: 0 }}>{terminalName || 'terminal001'}</Typography.Title>
               <Typography.Text type="secondary">登录用户：{username || 'user'}</Typography.Text>
             </div>
           </Space>
