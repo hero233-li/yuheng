@@ -86,6 +86,7 @@ POST /api/jobs/
   "workflow": "product_apply",
   "search_form": {
     "environment": "env_1",
+    "serviceType": "new",
     "product": "product_a",
     "location": "location_1",
     "jurisdiction": "jurisdiction_1",
@@ -305,7 +306,7 @@ apps/web/src/apps/web/searchFormConfig.ts
   name: 'email',
   label: '邮箱',
   type: 'input',
-  span: 3,
+  span: 4,
   editable: true,
   visible: true,
   submit: true,
@@ -319,18 +320,18 @@ apps/web/src/apps/web/searchFormConfig.ts
 ```ts
 extraFields: [
   {
-    name: 'serviceType',
-    label: '办理类型',
+    name: 'serviceLevel',
+    label: '服务等级',
     type: 'select',
-    span: 3,
+    span: 4,
     editable: true,
     visible: true,
     submit: true,
     required: true,
-    defaultValue: 'new',
+    defaultValue: 'normal',
     options: [
-      { label: '新办', value: 'new' },
-      { label: '变更', value: 'change' },
+      { label: '普通', value: 'normal' },
+      { label: '加急', value: 'urgent' },
     ],
   },
 ]
@@ -350,7 +351,7 @@ span: 24  一整行
 span: 12  半行
 span: 8   一行三个
 span: 6   一行四个
-span: 3   更紧凑
+span: 4   一行六个
 ```
 
 ## 新增产品

@@ -18,6 +18,7 @@ apps/web/src/apps/web/JobCreatePage.tsx
 
 ```ts
 const environments = [...]
+const serviceTypeOptions = [...]
 const productCatalog = [...]
 const commonFields = [...]
 export const cascadeResetMap = {...}
@@ -27,8 +28,9 @@ export const searchPageBehavior = {...}
 | 对象 | 作用 |
 | --- | --- |
 | `environments` | 环境列表 |
+| `serviceTypeOptions` | 办理类型列表，固定显示在环境后、产品前 |
 | `productCatalog` | 以产品为单位维护所在地、辖行、网点、字段规则 |
-| `commonFields` | 公共字段，如姓名、证件、手机 |
+| `commonFields` | 公共字段，如姓名、证件号、卡号、手机号、公司名、信用代码和上送开关 |
 | `cascadeResetMap` | 上级变化时自动重置哪些下级字段 |
 | `searchPageBehavior` | 搜索页面行为配置 |
 
@@ -41,7 +43,7 @@ export const searchPageBehavior = {...}
   name: 'serviceType',
   label: '办理类型',
   type: 'select',
-  span: 6,
+  span: 4,
   editable: true,
   visible: true,
   submit: true,
@@ -181,7 +183,7 @@ uncheckedLabel 是关闭时显示的文案
     姓名必填
     证件必填
     手机必填
-    额外字段：办理类型 select
+    固定字段：办理类型 select，显示在环境后、产品前
 
   产品B
     所在地2
@@ -241,18 +243,18 @@ fieldOverrides: {
 ```ts
 extraFields: [
   {
-    name: 'serviceType',
-    label: '办理类型',
+    name: 'serviceLevel',
+    label: '服务等级',
     type: 'select',
-    span: 6,
+    span: 4,
     editable: true,
     visible: true,
     submit: true,
     required: true,
-    defaultValue: 'new',
+    defaultValue: 'normal',
     options: [
-      { label: '新办', value: 'new' },
-      { label: '变更', value: 'change' },
+      { label: '普通', value: 'normal' },
+      { label: '加急', value: 'urgent' },
     ],
   },
 ]
@@ -284,6 +286,7 @@ span: 24  一整行
 span: 12  半行
 span: 8   一行三个
 span: 6   一行四个
+span: 4   一行六个
 ```
 
 每一个搜索项都可以单独控制 `span`，包括公共字段、产品专属字段、环境、产品、所在地、辖行、网点。
@@ -302,8 +305,8 @@ span: 6   一行四个
 
 ```ts
 export const cascadeResetMap = {
-  environment: ['product', 'location', 'jurisdiction', 'outlet', 'serviceType'],
-  product: ['location', 'jurisdiction', 'outlet', 'serviceType'],
+  environment: ['product', 'location', 'jurisdiction', 'outlet'],
+  product: ['location', 'jurisdiction', 'outlet'],
   location: ['jurisdiction', 'outlet'],
   jurisdiction: ['outlet'],
 };
@@ -352,6 +355,7 @@ submit = true
   "name": "产品申请",
   "search_form": {
     "environment": "env_1",
+    "serviceType": "new",
     "product": "product_a",
     "location": "location_1",
     "jurisdiction": "jurisdiction_1",
