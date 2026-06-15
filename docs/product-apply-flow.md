@@ -7,8 +7,8 @@
 | 位置 | 作用 |
 | --- | --- |
 | `apps/web/src/apps/web/JobCreatePage.tsx` | 产品申请页面，负责渲染表单、提交任务、展示执行结果 |
-| `apps/web/src/apps/web/searchFormConfig.ts` | 产品申请表单配置，维护环境、产品、产地、地区、城市、字段规则 |
-| `apps/web/src/api/app.ts` | 终端前端 API 封装，包含 `createJob`、`getJob`、`getJobLogs` |
+| `apps/web/src/apps/web/searchFormConfig.ts` | 产品申请表单配置，维护环境、产品、所在地、辖行、网点、字段规则 |
+| `apps/web/src/api/app.ts` | 前端 API 封装，包含 `createJob`、`getJob`、`getJobLogs` |
 | `apps/backend/jobs/views.py` | job 创建、查询、日志查询接口 |
 | `apps/backend/jobs/models.py` | Job、JobLog 数据模型，定义任务状态和阶段 |
 | `apps/backend/jobs/serializers.py` | Job 返回给前端的数据结构，包括进度步骤 |
@@ -20,7 +20,7 @@
 ```text
 用户打开产品申请页面
   -> 前端读取 searchFormConfig.ts 生成动态表单
-  -> 用户选择环境、产品、产地、地区、城市和业务字段
+  -> 用户选择环境、产品、所在地、辖行、网点和业务字段
   -> 点击执行
   -> 前端 POST /api/jobs/ 创建 job
   -> Django 写入 Job，返回 job_id
@@ -57,7 +57,7 @@ export const cascadeResetMap = {...}
 层级关系是：
 
 ```text
-环境 -> 产品 -> 产地 -> 地区 -> 城市
+环境 -> 产品 -> 所在地 -> 辖行 -> 网点
 ```
 
 这里的“一对多”是配置层面的候选关系，不是页面多选。
@@ -87,12 +87,19 @@ POST /api/jobs/
   "search_form": {
     "environment": "env_1",
     "product": "product_a",
-    "origin": "origin_1",
-    "region": "region_1",
-    "city": "city_1",
+    "location": "location_1",
+    "jurisdiction": "jurisdiction_1",
+    "outlet": "outlet_1",
     "personName": "张三",
-    "certificateNo": "xxx",
-    "phone": "13800000000"
+    "certificateNo": "110101199001011234",
+    "cardNo": "6222000000000000",
+    "phone": "13800000000",
+    "companyName": "示例公司",
+    "creditCode": "91310000MA00000000",
+    "whitelist": true,
+    "redShield": false,
+    "creditReport": false,
+    "legalPerson": false
   },
   "biz_payload": "{...}"
 }
@@ -196,7 +203,6 @@ run_product_apply_workflow(job)
 ```text
 读取任务参数
 校验业务参数
-调用登录接口
 调用交易预检查接口
 调用交易提交接口
 调用结果确认接口
@@ -356,16 +362,16 @@ span: 3   更紧凑
   id: 'product_c',
   label: '产品C',
   environmentIds: ['env_1', 'env_3'],
-  origins: [
+  locations: [
     {
-      id: 'origin_4',
-      label: '产地4',
-      regions: [
+      id: 'location_4',
+      label: '所在地4',
+      jurisdictions: [
         {
-          id: 'region_5',
-          label: '地区5',
-          cities: [
-            { id: 'city_6', label: '城市6' },
+          id: 'jurisdiction_5',
+          label: '辖行5',
+          outlets: [
+            { id: 'outlet_6', label: '网点6' },
           ],
         },
       ],
@@ -384,12 +390,12 @@ span: 3   更紧凑
 
 ```text
 environmentIds 控制哪些环境下能选择这个产品。
-origins 控制产品支持哪些产地、地区、城市。
+locations 控制产品支持哪些所在地、辖行、网点。
 fieldOverrides 控制公共字段在当前产品下是否必填、是否显示、是否提交。
 extraFields 控制当前产品独有字段。
 ```
 
-## 新增环境、产地、地区、城市
+## 新增环境、所在地、辖行、网点
 
 新增环境：
 
@@ -405,19 +411,19 @@ const environments = [
 environmentIds: ['env_1', 'env_4']
 ```
 
-新增产地、地区、城市时，只改产品下的 `origins`：
+新增所在地、辖行、网点时，只改产品下的 `locations`：
 
 ```ts
-origins: [
+locations: [
   {
-    id: 'origin_5',
-    label: '产地5',
-    regions: [
+    id: 'location_5',
+    label: '所在地5',
+    jurisdictions: [
       {
-        id: 'region_6',
-        label: '地区6',
-        cities: [
-          { id: 'city_7', label: '城市7' },
+        id: 'jurisdiction_6',
+        label: '辖行6',
+        outlets: [
+          { id: 'outlet_7', label: '网点7' },
         ],
       },
     ],
@@ -493,7 +499,6 @@ apps/backend/workflows/registry.py
 steps = [
     ("读取任务参数", "..."),
     ("校验业务参数", "..."),
-    ("调用登录接口", "..."),
     ("调用交易预检查接口", "..."),
     ("调用交易提交接口", "..."),
     ("调用结果确认接口", "..."),

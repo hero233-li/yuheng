@@ -157,7 +157,13 @@ export function JobCreatePage() {
       );
     }
     if (field.type === 'switch') {
-      return <Switch disabled={!field.editable} />;
+      return (
+        <Switch
+          disabled={!field.editable}
+          checkedChildren={field.checkedLabel}
+          unCheckedChildren={field.uncheckedLabel}
+        />
+      );
     }
     return <Input {...commonProps} />;
   }

@@ -154,7 +154,6 @@ apps/web/src/apps/web/SettingsPage.tsx
 | 名称 | 说明 |
 | --- | --- |
 | web | 当前前端运行模式 |
-| terminal | 当前启动服务电脑的本机标识 |
 | job | 异步任务记录 |
 | workflow | worker 业务流程类型 |
 

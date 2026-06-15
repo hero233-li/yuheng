@@ -11,8 +11,6 @@ import { JobCreatePage } from './apps/web/JobCreatePage';
 import { JobListPage } from './apps/web/JobListPage';
 import { SettingsPage } from './apps/web/SettingsPage';
 import { PlaceholderPage } from './apps/web/PlaceholderPage';
-import { LoginPage } from './apps/web/LoginPage';
-import { RequireAuth } from './components/RequireAuth';
 import { MultiTaskTablePage } from './apps/web/MultiTaskTablePage';
 import { CardSearchPage } from './apps/web/CardSearchPage';
 import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
@@ -22,30 +20,23 @@ import { SearchForm2Page } from './apps/web/SearchForm2Page';
 const queryClient = new QueryClient();
 
 const appRoutes = [
-  { path: '/login', element: <LoginPage /> },
   {
     path: '/',
-    element: <RequireAuth />,
+    element: <AppShell />,
     children: [
-      {
-        path: '/',
-        element: <AppShell />,
-        children: [
-          { index: true, element: <Navigate to="/product-apply" replace /> },
-          { path: 'product-apply', element: <JobCreatePage /> },
-          { path: 'search-form-2', element: <SearchForm2Page /> },
-          { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
-          { path: 'jobs', element: <JobListPage /> },
-          { path: 'personal-center', element: <PersonalCenterPage /> },
-          { path: 'multi-task-table', element: <MultiTaskTablePage /> },
-          { path: 'card-search', element: <CardSearchPage /> },
-          { path: 'grouped-card-search', element: <GroupedCardSearchPage /> },
-          { path: 'menu-two/overview', element: <Navigate to="/multi-task-table" replace /> },
-          { path: 'menu-three/overview', element: <PlaceholderPage title="菜单三页面" /> },
-          { path: 'system-settings', element: <SettingsPage /> },
-          { path: 'settings', element: <Navigate to="/system-settings" replace /> },
-        ],
-      },
+      { index: true, element: <Navigate to="/product-apply" replace /> },
+      { path: 'product-apply', element: <JobCreatePage /> },
+      { path: 'search-form-2', element: <SearchForm2Page /> },
+      { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
+      { path: 'jobs', element: <JobListPage /> },
+      { path: 'personal-center', element: <PersonalCenterPage /> },
+      { path: 'multi-task-table', element: <MultiTaskTablePage /> },
+      { path: 'card-search', element: <CardSearchPage /> },
+      { path: 'grouped-card-search', element: <GroupedCardSearchPage /> },
+      { path: 'menu-two/overview', element: <Navigate to="/multi-task-table" replace /> },
+      { path: 'menu-three/overview', element: <PlaceholderPage title="菜单三页面" /> },
+      { path: 'system-settings', element: <SettingsPage /> },
+      { path: 'settings', element: <Navigate to="/system-settings" replace /> },
     ],
   },
 ];

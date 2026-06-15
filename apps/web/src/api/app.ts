@@ -1,13 +1,8 @@
 import { apiClient } from './client';
-import type { Job, JobLog, LoginResult, Settings } from '../types';
+import type { Job, JobLog } from '../types';
 
 export async function getHealth() {
   const { data } = await apiClient.get('/health/');
-  return data;
-}
-
-export async function login(payload: { username: string; password: string }) {
-  const { data } = await apiClient.post<LoginResult>('/auth/login/', payload);
   return data;
 }
 
@@ -33,16 +28,6 @@ export async function getJobLogs(jobId: string) {
 
 export async function cancelJob(jobId: string) {
   const { data } = await apiClient.post<Job>(`/jobs/${jobId}/cancel/`);
-  return data;
-}
-
-export async function getSettings() {
-  const { data } = await apiClient.get<Settings>('/settings/');
-  return data;
-}
-
-export async function updateSettings(payload: Partial<Settings>) {
-  const { data } = await apiClient.put<Settings>('/settings/', payload);
   return data;
 }
 

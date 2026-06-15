@@ -72,10 +72,6 @@ body {
   font-size: 13px;
 }
 
-.app-header-user {
-  flex: 0 0 auto;
-}
-
 .app-content {
   width: 100%;
   flex: 1;
@@ -211,16 +207,13 @@ body {
   margin: 0;
 }
 
-.login-page {
-  display: grid;
-  min-height: 100%;
-  place-items: center;
-  background: #f5f7fb;
-}
-
 .page-stack {
   display: grid;
   gap: var(--page-gap, 16px);
+}
+
+.ant-switch {
+  min-width: 120px;
 }
 
 .log-box {

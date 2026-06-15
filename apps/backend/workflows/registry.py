@@ -20,7 +20,6 @@ def run_product_apply_workflow(job):
     steps = [
         ("读取任务参数", f"参数：{json.dumps(parsed_payload, ensure_ascii=False)}"),
         ("校验业务参数", "参数格式校验通过"),
-        ("调用登录接口", "Mock 登录成功，已获取会话 token"),
         ("调用交易预检查接口", "Mock 预检查通过，允许继续执行"),
         ("调用交易提交接口", "Mock 交易提交成功，流水号 MOCK-20260614-0001"),
         ("调用结果确认接口", "Mock 交易状态 confirmed"),

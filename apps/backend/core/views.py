@@ -1,6 +1,5 @@
 import json
 import os
-import socket
 from datetime import datetime
 
 from django.conf import settings
@@ -10,7 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from jobs.models import Job
-from .models import LocalAccount, Setting, default_machine_id
 
 CURRENT_VERSION = os.environ.get("APP_VERSION", "0.1.0")
 
@@ -330,59 +328,3 @@ def grouped_task_return(request):
     )
     return JsonResponse(GROUPED_TASK_STATE)
 
-
-def _settings_payload():
-    account = LocalAccount.ensure_default()
-    machine_id = Setting.get_value("machine_id", default_machine_id())
-    machine_name = Setting.get_value("machine_name", account.terminal_name or "terminal001")
-    return {
-        "machine_id": machine_id,
-        "machine_name": machine_name,
-        "username": account.username,
-        "terminal_name": account.terminal_name,
-        "version": CURRENT_VERSION,
-    }
-
-
-@csrf_exempt
-@require_http_methods(["GET", "PUT"])
-def settings_view(request):
-    if request.method == "GET":
-        return JsonResponse(_settings_payload())
-
-    payload = json.loads(request.body or "{}")
-    for key in ["machine_name"]:
-        if key in payload:
-            Setting.set_value(key, str(payload[key]))
-    if "terminal_name" in payload:
-        account = LocalAccount.ensure_default()
-        account.terminal_name = str(payload["terminal_name"] or "terminal001")
-        account.password = account.terminal_name
-        account.save(update_fields=["terminal_name", "password", "updated_at"])
-        Setting.set_value("machine_name", account.terminal_name)
-    return JsonResponse(_settings_payload())
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def login(request):
-    LocalAccount.ensure_default()
-    payload = json.loads(request.body or "{}")
-    username = payload.get("username")
-    password = payload.get("password")
-    try:
-        account = LocalAccount.objects.get(username=username)
-    except LocalAccount.DoesNotExist:
-        return JsonResponse({"detail": "用户名或密码错误"}, status=401)
-
-    if account.password != password:
-        return JsonResponse({"detail": "用户名或密码错误"}, status=401)
-
-    return JsonResponse(
-        {
-            "ok": True,
-            "username": account.username,
-            "terminal_name": account.terminal_name,
-            "machine_name": account.terminal_name,
-        }
-    )

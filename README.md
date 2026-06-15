@@ -26,14 +26,14 @@ Python 必须使用 3.10。项目脚本会检查 Python 版本，不符合会直
 apps/
   backend/                 Django 后端
     automation_backend/    Django settings / urls
-    core/                  健康检查、登录、设置、mock 接口
+    core/                  健康检查、mock 接口
     jobs/                  任务模型、任务接口、worker 命令
     workflows/             worker 业务流程
   web/                     React 前端
     src/api/               前端请求封装
     src/apps/web/          业务页面
     src/components/        应用布局、菜单、页签
-    src/stores/            登录、外观、菜单偏好
+    src/stores/            外观、菜单偏好
     src/types/             前端类型
 
 scripts/
@@ -121,15 +121,6 @@ SQLite 数据目录：
 ```text
 apps/backend/data/web/db.sqlite3
 ```
-
-## 默认账号
-
-```text
-用户名：user
-密码：terminal001
-```
-
-系统设置里修改“登录终端名”后，密码会同步为新的终端名。
 
 ## 文档导航
 

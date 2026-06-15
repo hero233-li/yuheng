@@ -3,25 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Avatar, Button, Descriptions, List, Progress, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { listJobs } from '../../api/app';
-import { useAuthStore } from '../../stores/authStore';
 
 export function PersonalCenterPage() {
-  const { username, terminalName } = useAuthStore();
   const jobsQuery = useQuery({ queryKey: ['jobs'], queryFn: listJobs, refetchInterval: 3000 });
 
   return (
-    <PageContainer title="个人中心" subTitle="汇总当前用户执行过的搜索和结果">
+    <PageContainer title="个人中心" subTitle="汇总当前浏览器执行过的搜索和结果">
       <div className="page-stack">
-        <ProCard>
-          <Space size={16}>
-            <Avatar size={64}>{terminalName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
-            <div>
-              <Typography.Title level={4} style={{ margin: 0 }}>{terminalName || 'terminal001'}</Typography.Title>
-              <Typography.Text type="secondary">登录用户：{username || 'user'}</Typography.Text>
-            </div>
-          </Space>
-        </ProCard>
-
         <ProCard title="执行历史">
           <List
             loading={jobsQuery.isLoading}

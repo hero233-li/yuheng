@@ -33,18 +33,3 @@ export interface JobLog {
   message: string;
   created_at: string;
 }
-
-export interface Settings {
-  machine_id: string;
-  machine_name: string;
-  username: string;
-  terminal_name: string;
-  version: string;
-}
-
-export interface LoginResult {
-  ok: boolean;
-  username: string;
-  terminal_name: string;
-  machine_name: string;
-}

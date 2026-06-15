@@ -9,13 +9,12 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Avatar, Breadcrumb, Button, ConfigProvider, Dropdown, Layout, Menu, Space, Tabs, Typography, theme } from 'antd';
+import { Breadcrumb, Button, ConfigProvider, Layout, Menu, Tabs, Tag, Typography, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import { useAppPreferences } from '../stores/appPreferences';
-import { useAuthStore } from '../stores/authStore';
 
 const { Header, Sider, Content } = Layout;
 
@@ -78,7 +77,6 @@ export function AppShell() {
     menuTabModes,
     setSiderCollapsed,
   } = useAppPreferences();
-  const { username, terminalName, logout } = useAuthStore();
   const [tabs, setTabs] = useState<Array<{ key: string; path: string; label: string }>>([]);
   const [activeTabKey, setActiveTabKey] = useState('');
   const flatMenuItems = useMemo(() => flattenMenu(menuItems), [menuItems]);
@@ -176,30 +174,7 @@ export function AppShell() {
                 </Typography.Text>
               </div>
             </div>
-            <Dropdown
-              menu={{
-                items: [
-                  { key: 'profile', label: '个人中心', onClick: () => navigate('/personal-center') },
-                  { key: 'settings', label: '系统设置', onClick: () => navigate('/system-settings') },
-                  { type: 'divider' },
-                  {
-                    key: 'logout',
-                    label: '退出登录',
-                    onClick: () => {
-                      logout();
-                      navigate('/login', { replace: true });
-                    },
-                  },
-                ],
-              }}
-            >
-              <Button type="text" className="app-header-user">
-                <Space>
-                  <Avatar size="small">{terminalName?.slice(0, 1).toUpperCase() || 'F'}</Avatar>
-                  <span>{terminalName || username || 'terminal001'}</span>
-                </Space>
-              </Button>
-            </Dropdown>
+            <Tag color="blue">本地网络版</Tag>
           </Header>
           {tabs.length > 0 && (
             <div className="app-tabs">

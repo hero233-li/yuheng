@@ -1,8 +1,6 @@
-import { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Button, ColorPicker, Descriptions, Radio, Space, Tabs, Tag, Typography } from 'antd';
+import { PageContainer, ProCard } from '@ant-design/pro-components';
+import { Button, ColorPicker, Descriptions, Radio, Space, Tabs, Tag, Typography } from 'antd';
 import type { ReactNode } from 'react';
-import { getSettings, updateSettings } from '../../api/app';
 import { useAppPreferences } from '../../stores/appPreferences';
 
 const menuSettings = [
@@ -17,7 +15,6 @@ const menuSettings = [
 ];
 
 export function SettingsPage() {
-  const { message } = App.useApp();
   const {
     themeMode,
     primaryColor,
@@ -44,49 +41,12 @@ export function SettingsPage() {
     setSiderWidth,
     setTableSize,
     setCardShadow,
-    setMenuTabMode,
   } = useAppPreferences();
-  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: getSettings });
-  const updateMutation = useMutation({
-    mutationFn: updateSettings,
-    onSuccess: () => message.success('设置已保存'),
-  });
 
   return (
     <PageContainer title="系统设置">
       <Tabs
         items={[
-          {
-            key: 'machine',
-            label: '本机设置',
-            children: (
-              <div className="page-stack">
-                <ProCard title="基础信息">
-                  <Descriptions column={2}>
-                    <Descriptions.Item label="机器码">
-                      {settingsQuery.data?.machine_id || '-'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="当前版本">
-                      <Tag color="blue">{settingsQuery.data?.version || '-'}</Tag>
-                    </Descriptions.Item>
-                  </Descriptions>
-                </ProCard>
-                <ProCard title="本机账号">
-                  <ProForm
-                    layout="vertical"
-                    request={async () => settingsQuery.data || {}}
-                    onFinish={async (values) => {
-                      await updateMutation.mutateAsync(values);
-                      return true;
-                    }}
-                  >
-                    <ProFormText name="machine_name" label="终端名称" />
-                    <ProFormText name="terminal_name" label="登录终端名" tooltip="密码默认等于当前终端名" />
-                  </ProForm>
-                </ProCard>
-              </div>
-            ),
-          },
           {
             key: 'appearance',
             label: '外观设置',
@@ -205,16 +165,18 @@ export function SettingsPage() {
             label: '菜单管理',
             children: (
               <ProCard title="菜单管理">
-                <Descriptions column={1}>
+                <Typography.Paragraph type="secondary">
+                  当前页面只展示菜单页签模式，具体是否可多开请在 React 配置中维护。
+                </Typography.Paragraph>
+                <Descriptions column={1} bordered size="small">
                   {menuSettings.map((item) => (
                     <Descriptions.Item label={item.label} key={item.path}>
-                      <Radio.Group
-                        value={menuTabModes[item.path] || 'single'}
-                        onChange={(event) => setMenuTabMode(item.path, event.target.value)}
-                      >
-                        <Radio.Button value="single">复用页签</Radio.Button>
-                        <Radio.Button value="multi">允许多开</Radio.Button>
-                      </Radio.Group>
+                      <Space>
+                        <Tag color={menuTabModes[item.path] === 'multi' ? 'purple' : 'blue'}>
+                          {menuTabModes[item.path] === 'multi' ? '允许多开' : '复用页签'}
+                        </Tag>
+                        <Typography.Text type="secondary">{item.path}</Typography.Text>
+                      </Space>
                     </Descriptions.Item>
                   ))}
                 </Descriptions>

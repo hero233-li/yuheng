@@ -5,7 +5,7 @@
 ## 总原则
 
 ```text
-页面配置、查询、登录、设置、轻量 mock：普通 API
+页面配置、查询、轻量 mock：普通 API
 耗时流程、自动化执行、批量处理、需要进度日志的动作：Job + worker
 ```
 
@@ -22,9 +22,6 @@ worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
 | 场景 | 接口 | 是否走 worker |
 | --- | --- | --- |
 | 健康检查 | `GET /api/health/` | 否 |
-| 登录 | `POST /api/auth/login/` | 否 |
-| 系统设置读取 | `GET /api/settings/` | 否 |
-| 系统设置保存 | `PUT /api/settings/` | 否 |
 | 任务列表查询 | `GET /api/jobs/` | 否 |
 | 任务详情查询 | `GET /api/jobs/{id}/` | 否 |
 | 任务日志查询 | `GET /api/jobs/{id}/logs/` | 否 |

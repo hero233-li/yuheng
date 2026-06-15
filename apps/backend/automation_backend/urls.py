@@ -5,7 +5,6 @@ from jobs import views as job_views
 
 urlpatterns = [
     path("api/health/", core_views.health),
-    path("api/auth/login/", core_views.login),
     path("api/mock/multi-task-table/", core_views.multi_task_table_mock),
     path("api/mock/multi-task-table/rows/", core_views.multi_task_table_add_row),
     path("api/mock/multi-task-table/rows/<str:row_id>/", core_views.multi_task_table_row),
@@ -18,7 +17,6 @@ urlpatterns = [
     path("api/mock/grouped-task/state/", core_views.grouped_task_state),
     path("api/mock/grouped-task/claim/", core_views.grouped_task_claim),
     path("api/mock/grouped-task/return/", core_views.grouped_task_return),
-    path("api/settings/", core_views.settings_view),
     path("api/jobs/", job_views.jobs_view),
     path("api/jobs/<uuid:job_id>/", job_views.job_detail),
     path("api/jobs/<uuid:job_id>/logs/", job_views.job_logs),

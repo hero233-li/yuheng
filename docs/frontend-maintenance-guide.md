@@ -15,10 +15,10 @@ apps/web/src
 | 路径 | 作用 |
 | --- | --- |
 | `apps/web/src/main.tsx` | 路由入口 |
-| `apps/web/src/components/AppShell.tsx` | 左侧菜单、顶部导航、页签、面包屑、头像 |
+| `apps/web/src/components/AppShell.tsx` | 左侧菜单、顶部导航、页签、面包屑 |
 | `apps/web/src/apps/web/` | 本机页面 |
 | `apps/web/src/api/` | 前端请求后端接口 |
-| `apps/web/src/stores/` | 前端状态，如登录、外观、菜单配置 |
+| `apps/web/src/stores/` | 前端状态，如外观、菜单配置 |
 | `apps/web/src/types/` | 前端类型定义 |
 
 ## 新增一个页面
@@ -125,7 +125,7 @@ single：点击菜单复用同一个页签
 multi：每次点击可以打开 页面A-1 / 页面A-2
 ```
 
-如果希望系统设置里可以配置这个菜单，还要改：
+如果希望系统设置里的“菜单管理”能展示这个菜单，还要改：
 
 ```text
 apps/web/src/apps/web/SettingsPage.tsx
@@ -136,6 +136,8 @@ apps/web/src/apps/web/SettingsPage.tsx
 ```ts
 { path: '/page-a', label: '页面A' }
 ```
+
+注意：菜单管理页当前只读展示，不在页面里编辑是否允许多开。真正的多开策略仍然维护在 `apps/web/src/stores/appPreferences.ts`。
 
 ## 新增接口
 

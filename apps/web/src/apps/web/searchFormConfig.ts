@@ -18,34 +18,36 @@ export interface FieldConfig {
   placeholder?: string;
   defaultValue?: unknown;
   options?: SelectOption[];
+  checkedLabel?: string;
+  uncheckedLabel?: string;
   visibleWhen?: {
     field: string;
     value: unknown;
   };
 }
 
-interface CityConfig {
+interface OutletConfig {
   id: string;
   label: string;
 }
 
-interface RegionConfig {
+interface JurisdictionConfig {
   id: string;
   label: string;
-  cities: CityConfig[];
+  outlets: OutletConfig[];
 }
 
-interface OriginConfig {
+interface LocationConfig {
   id: string;
   label: string;
-  regions: RegionConfig[];
+  jurisdictions: JurisdictionConfig[];
 }
 
 interface ProductConfig {
   id: string;
   label: string;
   environmentIds: string[];
-  origins: OriginConfig[];
+  locations: LocationConfig[];
   fieldOverrides?: Record<string, Partial<FieldConfig>>;
   extraFields?: FieldConfig[];
 }
@@ -61,33 +63,33 @@ const productCatalog: ProductConfig[] = [
     id: 'product_a',
     label: '产品A',
     environmentIds: ['env_1', 'env_2', 'env_3'],
-    origins: [
+    locations: [
       {
-        id: 'origin_1',
-        label: '产地1',
-        regions: [
+        id: 'location_1',
+        label: '所在地1',
+        jurisdictions: [
           {
-            id: 'region_1',
-            label: '地区1',
-            cities: [{ id: 'city_1', label: '城市1' }],
+            id: 'jurisdiction_1',
+            label: '辖行1',
+            outlets: [{ id: 'outlet_1', label: '网点1' }],
           },
           {
-            id: 'region_2',
-            label: '地区2',
-            cities: [{ id: 'city_2', label: '城市2' }],
+            id: 'jurisdiction_2',
+            label: '辖行2',
+            outlets: [{ id: 'outlet_2', label: '网点2' }],
           },
         ],
       },
       {
-        id: 'origin_3',
-        label: '产地3',
-        regions: [
+        id: 'location_3',
+        label: '所在地3',
+        jurisdictions: [
           {
-            id: 'region_4',
-            label: '地区4',
-            cities: [
-              { id: 'city_4', label: '城市4' },
-              { id: 'city_5', label: '城市5' },
+            id: 'jurisdiction_4',
+            label: '辖行4',
+            outlets: [
+              { id: 'outlet_4', label: '网点4' },
+              { id: 'outlet_5', label: '网点5' },
             ],
           },
         ],
@@ -97,6 +99,7 @@ const productCatalog: ProductConfig[] = [
       personName: { required: true, visible: true, submit: true },
       certificateNo: { required: true },
       phone: { required: true },
+      cardNo: { required: true },
     },
     extraFields: [
       {
@@ -120,15 +123,15 @@ const productCatalog: ProductConfig[] = [
     id: 'product_b',
     label: '产品B',
     environmentIds: ['env_1', 'env_2'],
-    origins: [
+    locations: [
       {
-        id: 'origin_2',
-        label: '产地2',
-        regions: [
+        id: 'location_2',
+        label: '所在地2',
+        jurisdictions: [
           {
-            id: 'region_3',
-            label: '地区3',
-            cities: [{ id: 'city_3', label: '城市3' }],
+            id: 'jurisdiction_3',
+            label: '辖行3',
+            outlets: [{ id: 'outlet_3', label: '网点3' }],
           },
         ],
       },
@@ -137,6 +140,8 @@ const productCatalog: ProductConfig[] = [
       personName: { required: false, placeholder: '产品B姓名非必填' },
       certificateNo: { required: true },
       phone: { required: false },
+      companyName: { required: true },
+      creditCode: { required: true },
     },
   },
 ];
@@ -154,7 +159,7 @@ const commonFields: FieldConfig[] = [
   },
   {
     name: 'certificateNo',
-    label: '证件',
+    label: '证件号',
     type: 'input',
     span: 3,
     editable: true,
@@ -164,7 +169,7 @@ const commonFields: FieldConfig[] = [
   },
   {
     name: 'phone',
-    label: '手机',
+    label: '手机号',
     type: 'input',
     span: 3,
     editable: true,
@@ -173,22 +178,90 @@ const commonFields: FieldConfig[] = [
     placeholder: '请输入手机号',
   },
   {
-    name: 'includeArchived',
-    label: '包含历史',
-    type: 'switch',
+    name: 'cardNo',
+    label: '卡号',
+    type: 'input',
     span: 3,
     editable: true,
     visible: true,
     submit: true,
+    placeholder: '请输入卡号',
+  },
+  {
+    name: 'companyName',
+    label: '公司名',
+    type: 'input',
+    span: 3,
+    editable: true,
+    visible: true,
+    submit: true,
+    placeholder: '请输入公司名',
+  },
+  {
+    name: 'creditCode',
+    label: '信用代码',
+    type: 'input',
+    span: 3,
+    editable: true,
+    visible: true,
+    submit: true,
+    placeholder: '请输入信用代码',
+  },
+  {
+    name: 'whitelist',
+    label: '白名单',
+    type: 'switch',
+    span: 6,
+    editable: true,
+    visible: true,
+    submit: true,
+    defaultValue: true,
+    checkedLabel: '白名单自动发送',
+    uncheckedLabel: '白名单不上送',
+  },
+  {
+    name: 'redShield',
+    label: '红盾',
+    type: 'switch',
+    span: 6,
+    editable: true,
+    visible: true,
+    submit: true,
     defaultValue: false,
+    checkedLabel: '红盾自动发送',
+    uncheckedLabel: '红盾不上送',
+  },
+  {
+    name: 'creditReport',
+    label: '征信',
+    type: 'switch',
+    span: 6,
+    editable: true,
+    visible: true,
+    submit: true,
+    defaultValue: false,
+    checkedLabel: '征信自动发送',
+    uncheckedLabel: '征信不上送',
+  },
+  {
+    name: 'legalPerson',
+    label: '法人',
+    type: 'switch',
+    span: 6,
+    editable: true,
+    visible: true,
+    submit: true,
+    defaultValue: false,
+    checkedLabel: '法人自动发送',
+    uncheckedLabel: '法人不上送',
   },
 ];
 
 export const cascadeResetMap: Record<string, string[]> = {
-  environment: ['product', 'origin', 'region', 'city', 'serviceType'],
-  product: ['origin', 'region', 'city', 'serviceType'],
-  origin: ['region', 'city'],
-  region: ['city'],
+  environment: ['product', 'location', 'jurisdiction', 'outlet', 'serviceType'],
+  product: ['location', 'jurisdiction', 'outlet', 'serviceType'],
+  location: ['jurisdiction', 'outlet'],
+  jurisdiction: ['outlet'],
 };
 
 export const searchPageBehavior = {
@@ -200,13 +273,13 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
   const productOptions = getProductsByEnvironment(environmentId).map(toOption);
   const productId = getValidValue(values.product, productOptions);
   const product = getProduct(productId);
-  const originOptions = uniqueOptions(product.origins.map(toOption));
-  const originId = getValidValue(values.origin, originOptions);
-  const origin = product.origins.find((item) => item.id === originId) || product.origins[0];
-  const regionOptions = uniqueOptions((origin?.regions || []).map(toOption));
-  const regionId = getValidValue(values.region, regionOptions);
-  const region = origin?.regions.find((item) => item.id === regionId) || origin?.regions[0];
-  const cityOptions = uniqueOptions((region?.cities || []).map(toOption));
+  const locationOptions = uniqueOptions(product.locations.map(toOption));
+  const locationId = getValidValue(values.location, locationOptions);
+  const location = product.locations.find((item) => item.id === locationId) || product.locations[0];
+  const jurisdictionOptions = uniqueOptions((location?.jurisdictions || []).map(toOption));
+  const jurisdictionId = getValidValue(values.jurisdiction, jurisdictionOptions);
+  const jurisdiction = location?.jurisdictions.find((item) => item.id === jurisdictionId) || location?.jurisdictions[0];
+  const outletOptions = uniqueOptions((jurisdiction?.outlets || []).map(toOption));
 
   const hierarchyFields: FieldConfig[] = [
     {
@@ -234,40 +307,40 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       options: productOptions,
     },
     {
-      name: 'origin',
-      label: '产地',
+      name: 'location',
+      label: '所在地',
       type: 'select',
       span: 6,
       editable: true,
       visible: true,
       submit: true,
       required: true,
-      defaultValue: originOptions[0]?.value,
-      options: originOptions,
+      defaultValue: locationOptions[0]?.value,
+      options: locationOptions,
     },
     {
-      name: 'region',
-      label: '地区',
+      name: 'jurisdiction',
+      label: '辖行',
       type: 'select',
       span: 6,
       editable: true,
       visible: true,
       submit: true,
       required: true,
-      defaultValue: regionOptions[0]?.value,
-      options: regionOptions,
+      defaultValue: jurisdictionOptions[0]?.value,
+      options: jurisdictionOptions,
     },
     {
-      name: 'city',
-      label: '城市',
+      name: 'outlet',
+      label: '网点',
       type: 'select',
       span: 6,
       editable: true,
       visible: true,
       submit: true,
       required: true,
-      defaultValue: cityOptions[0]?.value,
-      options: cityOptions,
+      defaultValue: outletOptions[0]?.value,
+      options: outletOptions,
     },
   ];
 

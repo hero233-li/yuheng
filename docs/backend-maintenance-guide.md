@@ -66,8 +66,6 @@ apps/backend/automation_backend/urls.py
 | 路由 | 说明 |
 | --- | --- |
 | `GET /api/health/` | 健康检查 |
-| `POST /api/auth/login/` | 登录 |
-| `GET/PUT /api/settings/` | 系统设置 |
 | `GET/POST /api/jobs/` | 查询/创建任务 |
 | `GET /api/jobs/{id}/` | 查询任务详情 |
 | `GET /api/jobs/{id}/logs/` | 查询任务日志 |
@@ -77,51 +75,6 @@ apps/backend/automation_backend/urls.py
 新增接口时优先在对应 app 的 `views.py` 写方法，再到 `urls.py` 注册。
 
 ## 模型
-
-### Setting
-
-位置：
-
-```text
-apps/backend/core/models.py
-```
-
-用途：
-
-```text
-保存本机设置，例如 machine_id、machine_name
-```
-
-读写方式：
-
-```python
-Setting.get_value("machine_name", "terminal001")
-Setting.set_value("machine_name", "terminal001")
-```
-
-### LocalAccount
-
-用途：
-
-```text
-保存本机登录账号
-```
-
-默认账号：
-
-```text
-user / terminal001
-```
-
-字段：
-
-| 字段 | 说明 |
-| --- | --- |
-| `username` | 用户名 |
-| `password` | 当前是明文 mock 密码 |
-| `terminal_name` | 登录终端名 |
-
-后续如果要正式使用，需要改成密码哈希。
 
 ### Job
 

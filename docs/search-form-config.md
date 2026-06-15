@@ -27,7 +27,7 @@ export const searchPageBehavior = {...}
 | 对象 | 作用 |
 | --- | --- |
 | `environments` | 环境列表 |
-| `productCatalog` | 以产品为单位维护产地、地区、城市、字段规则 |
+| `productCatalog` | 以产品为单位维护所在地、辖行、网点、字段规则 |
 | `commonFields` | 公共字段，如姓名、证件、手机 |
 | `cascadeResetMap` | 上级变化时自动重置哪些下级字段 |
 | `searchPageBehavior` | 搜索页面行为配置 |
@@ -66,7 +66,7 @@ defaultValue 使用字符串
 这里要区分两个概念：
 
 ```text
-一对多候选：一个产品可以支持多个环境、多个产地、多个地区、多个城市，但用户每次只选一个。
+一对多候选：一个产品可以支持多个环境、多个所在地、多个辖行、多个网点，但用户每次只选一个。
 多选 Select：页面控件允许用户一次勾选多个值，提交给后端的是数组。
 ```
 
@@ -75,9 +75,9 @@ defaultValue 使用字符串
 ```text
 环境：单选
 产品：单选
-产地：单选
-地区：单选
-城市：单选
+所在地：单选
+辖行：单选
+网点：单选
 ```
 
 例如产品A支持环境1、环境2、环境3，不是页面一次选三个环境，而是三个环境都能在下拉中选到，并且选中任意一个环境时都能继续选择产品A。
@@ -116,14 +116,16 @@ defaultValue 使用数组
 
 ```ts
 {
-  name: 'includeArchived',
-  label: '包含历史',
+  name: 'whitelist',
+  label: '白名单',
   type: 'switch',
   span: 6,
   editable: true,
   visible: true,
   submit: true,
-  defaultValue: false,
+  defaultValue: true,
+  checkedLabel: '白名单自动发送',
+  uncheckedLabel: '白名单不上送',
 }
 ```
 
@@ -133,6 +135,8 @@ defaultValue 使用数组
 type: 'switch'
 defaultValue 使用 true / false
 提交给后端时是 boolean
+checkedLabel 是打开时显示的文案
+uncheckedLabel 是关闭时显示的文案
 ```
 
 ## 产品目录
@@ -146,15 +150,15 @@ defaultValue 使用 true / false
   id: 'product_a',
   label: '产品A',
   environmentIds: ['env_1'],
-  origins: [
+  locations: [
     {
-      id: 'origin_1',
-      label: '产地1',
-      regions: [
+      id: 'location_1',
+      label: '所在地1',
+      jurisdictions: [
         {
-          id: 'region_1',
-          label: '地区1',
-          cities: [{ id: 'city_1', label: '城市1' }],
+          id: 'jurisdiction_1',
+          label: '辖行1',
+          outlets: [{ id: 'outlet_1', label: '网点1' }],
         },
       ],
     },
@@ -171,17 +175,17 @@ defaultValue 使用 true / false
 ```text
 环境1
   产品A
-    产地1
-      地区1 -> 城市1
-      地区2 -> 城市2
+    所在地1
+      辖行1 -> 网点1
+      辖行2 -> 网点2
     姓名必填
     证件必填
     手机必填
     额外字段：办理类型 select
 
   产品B
-    产地2
-      地区3 -> 城市3
+    所在地2
+      辖行3 -> 网点3
     姓名非必填
     证件必填
     手机非必填
@@ -282,7 +286,7 @@ span: 8   一行三个
 span: 6   一行四个
 ```
 
-每一个搜索项都可以单独控制 `span`，包括公共字段、产品专属字段、环境、产品、产地、地区、城市。
+每一个搜索项都可以单独控制 `span`，包括公共字段、产品专属字段、环境、产品、所在地、辖行、网点。
 
 例如让姓名更长：
 
@@ -298,17 +302,17 @@ span: 6   一行四个
 
 ```ts
 export const cascadeResetMap = {
-  environment: ['product', 'origin', 'region', 'city', 'serviceType'],
-  product: ['origin', 'region', 'city', 'serviceType'],
-  origin: ['region', 'city'],
-  region: ['city'],
+  environment: ['product', 'location', 'jurisdiction', 'outlet', 'serviceType'],
+  product: ['location', 'jurisdiction', 'outlet', 'serviceType'],
+  location: ['jurisdiction', 'outlet'],
+  jurisdiction: ['outlet'],
 };
 ```
 
 例如产品变化后，会重置：
 
 ```text
-产地 / 地区 / 城市 / 产品专属字段
+所在地 / 辖行 / 网点 / 产品专属字段
 ```
 
 ## 是否读取历史数据
@@ -349,13 +353,19 @@ submit = true
   "search_form": {
     "environment": "env_1",
     "product": "product_a",
-    "origin": "origin_1",
-    "region": "region_1",
-    "city": "city_1",
+    "location": "location_1",
+    "jurisdiction": "jurisdiction_1",
+    "outlet": "outlet_1",
     "personName": "张三",
     "certificateNo": "110101199001011234",
+    "cardNo": "6222000000000000",
     "phone": "13800000000",
-    "includeArchived": false,
+    "companyName": "示例公司",
+    "creditCode": "91310000MA00000000",
+    "whitelist": true,
+    "redShield": false,
+    "creditReport": false,
+    "legalPerson": false,
     "serviceType": "new"
   },
   "biz_payload": "{...}"

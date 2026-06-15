@@ -84,9 +84,6 @@ apps/web/src/api/app.ts
 
 | 方法 | 后端接口 | 说明 |
 | --- | --- | --- |
-| `login` | `POST /api/auth/login/` | 登录 |
-| `getSettings` | `GET /api/settings/` | 获取设置 |
-| `updateSettings` | `PUT /api/settings/` | 更新设置 |
 | `createJob` | `POST /api/jobs/` | 创建异步任务 |
 | `listJobs` | `GET /api/jobs/` | 查询任务列表 |
 | `getJob` | `GET /api/jobs/{id}/` | 查询任务详情 |
@@ -181,32 +178,6 @@ apps/backend/workflows/registry.py
 ```
 
 增加 `flow_a` 分发和执行函数。
-
-## 登录协议
-
-默认账号：
-
-```text
-user / terminal001
-```
-
-登录响应：
-
-```json
-{
-  "ok": true,
-  "username": "user",
-  "terminal_name": "terminal001",
-  "machine_name": "terminal001"
-}
-```
-
-前端存储：
-
-```text
-apps/web/src/stores/authStore.ts
-localStorage key: automation_auth
-```
 
 ## 错误返回约定
 
