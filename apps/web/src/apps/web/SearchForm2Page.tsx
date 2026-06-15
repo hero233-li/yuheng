@@ -1,16 +1,13 @@
-import { DownloadOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
+import { PlayCircleOutlined } from '@ant-design/icons';
+import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Button, Col, Form, Input, Progress, Row, Select, Space, Statistic, Switch, Tag, Typography } from 'antd';
+import { App, Button, Col, Form, Input, Progress, Row, Select, Space, Switch, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import {
   createJob,
-  exportSearchForm2Result,
   getJob,
   getSearchForm2Config,
   type SearchForm2FieldConfig,
-  type SearchForm2Result,
-  type SearchForm2ResultRow,
 } from '../../api/app';
 
 export function SearchForm2Page() {
@@ -44,29 +41,11 @@ export function SearchForm2Page() {
     },
   });
 
-  const result = jobQuery.data?.status === 'success' ? (jobQuery.data.result as SearchForm2Result | null) : null;
-
   const executeMutation = useMutation({
     mutationFn: createJob,
     onSuccess: (job) => {
       setJobId(job.id);
       message.success(`执行任务已提交：${job.id}`);
-    },
-  });
-
-  const exportMutation = useMutation({
-    mutationFn: exportSearchForm2Result,
-    onSuccess: (blob) => {
-      if (!jobId) {
-        return;
-      }
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `搜索表单2-${jobId}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      message.success('导出文件已生成');
     },
   });
 
@@ -124,7 +103,7 @@ export function SearchForm2Page() {
       fields,
     };
     executeMutation.mutate({
-      name: `搜索表单2-${environment?.label || values.environment}-${operation?.label || values.operation}`,
+      name: `数据维护-${environment?.label || values.environment}-${operation?.label || values.operation}`,
       workflow: 'search_form_2',
       search_form: bizPayload,
       biz_payload: JSON.stringify(bizPayload, null, 2),
@@ -132,7 +111,7 @@ export function SearchForm2Page() {
   }
 
   return (
-    <PageContainer title="搜索表单2" subTitle="固定环境与操作配置，执行结果由后端 mock 返回并支持导出">
+    <PageContainer title="数据维护" subTitle="固定环境与操作配置，执行后展示后端返回进度">
       <div className="page-stack">
         <ProCard title="执行条件" loading={configQuery.isLoading}>
           <Form form={form} layout="vertical" onFinish={handleExecute}>
@@ -197,7 +176,6 @@ export function SearchForm2Page() {
           <ProCard title="执行状态">
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Space wrap>
-                <Typography.Text>任务编号：{jobQuery.data.id}</Typography.Text>
                 <Tag color={jobQuery.data.status === 'success' ? 'success' : jobQuery.data.status === 'failed' ? 'error' : 'processing'}>
                   {jobQuery.data.stage_label}
                 </Tag>
@@ -209,59 +187,6 @@ export function SearchForm2Page() {
               {jobQuery.data.error && <Typography.Text type="danger">{jobQuery.data.error}</Typography.Text>}
             </Space>
           </ProCard>
-        )}
-
-        {result && (
-          <>
-            <Space size={16} wrap>
-              <ProCard style={{ width: 180 }}>
-                <Statistic title="结果总数" value={result.summary.total} />
-              </ProCard>
-              <ProCard style={{ width: 180 }}>
-                <Statistic title="成功" value={result.summary.success} />
-              </ProCard>
-              <ProCard style={{ width: 180 }}>
-                <Statistic title="需复核" value={result.summary.review} />
-              </ProCard>
-              <ProCard style={{ width: 260 }}>
-                <Statistic title="执行时间" value={result.executed_at} />
-              </ProCard>
-            </Space>
-
-            <ProCard
-              title={result.title}
-              extra={
-                <Button
-                  icon={<DownloadOutlined />}
-                  loading={exportMutation.isPending}
-                  onClick={() => exportMutation.mutate(result.result_id)}
-                >
-                  导出文件
-                </Button>
-              }
-            >
-              <ProTable<SearchForm2ResultRow>
-                rowKey="id"
-                search={false}
-                options={false}
-                dataSource={result.rows}
-                pagination={false}
-                columns={[
-                  { title: '结果编号', dataIndex: 'id', width: 120 },
-                  { title: '项目', dataIndex: 'item', width: 180 },
-                  { title: '环境', dataIndex: 'environment', width: 120 },
-                  { title: '操作', dataIndex: 'operation', width: 120 },
-                  {
-                    title: '状态',
-                    dataIndex: 'status',
-                    width: 120,
-                    render: (_, row) => <Tag color={row.status === '成功' ? 'success' : 'warning'}>{row.status}</Tag>,
-                  },
-                  { title: '说明', dataIndex: 'message' },
-                ]}
-              />
-            </ProCard>
-          </>
         )}
       </div>
     </PageContainer>

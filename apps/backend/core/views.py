@@ -77,7 +77,6 @@ SEARCH_FORM_2_CONFIG = {
             "fields": [
                 {"name": "applicantName", "label": "申请人", "type": "input", "required": True, "span": 6, "defaultValue": "张三"},
                 {"name": "applyType", "label": "申请类型", "type": "select", "required": True, "span": 6, "defaultValue": "new", "options": [{"label": "新办", "value": "new"}, {"label": "变更", "value": "change"}]},
-                {"name": "includeDetail", "label": "包含明细", "type": "switch", "required": False, "span": 6, "defaultValue": True},
             ],
         },
         {
@@ -262,7 +261,7 @@ def search_form_2_export(request, result_id):
     job = get_object_or_404(Job, id=result_id)
     result = job.result or {}
     if job.status != Job.STATUS_SUCCESS or result.get("workflow") != "search_form_2":
-        return JsonResponse({"detail": "任务未完成或没有可导出的搜索表单2结果"}, status=400)
+        return JsonResponse({"detail": "任务未完成或没有可导出的数据维护结果"}, status=400)
 
     lines = ["结果编号,项目,环境,操作,状态,说明"]
     for row in result.get("rows", []):
@@ -327,4 +326,3 @@ def grouped_task_return(request):
         }
     )
     return JsonResponse(GROUPED_TASK_STATE)
-

@@ -25,7 +25,7 @@ worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
 | 任务列表查询 | `GET /api/jobs/` | 否 |
 | 任务详情查询 | `GET /api/jobs/{id}/` | 否 |
 | 任务日志查询 | `GET /api/jobs/{id}/logs/` | 否 |
-| 搜索表单配置 | `GET /api/mock/search-form-2/config/` | 否 |
+| 数据维护配置 | `GET /api/mock/search-form-2/config/` | 否 |
 | 多维任务表格数据 | `GET /api/mock/multi-task-table/` | 否 |
 | 多维任务表格保存 | `POST /api/mock/multi-task-table/save/` | 否 |
 | 分组卡片搜索 | `POST /api/mock/grouped-cards/` | 否 |
@@ -42,7 +42,7 @@ worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
 | 场景 | 创建接口 | worker workflow |
 | --- | --- | --- |
 | 产品申请 | `POST /api/jobs/` | `product_apply` |
-| 搜索表单2执行 | `POST /api/jobs/` | `search_form_2` |
+| 数据维护执行 | `POST /api/jobs/` | `search_form_2` |
 
 前端创建任务后不等待业务执行完成，只拿到 `job_id`：
 

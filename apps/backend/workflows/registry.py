@@ -66,14 +66,14 @@ def run_search_form_2_workflow(job):
     operation_label = parsed_payload.get("operationLabel") or operation
 
     steps = [
-        ("读取搜索表单2参数", f"环境：{environment_label}，操作：{operation_label}"),
+        ("读取数据维护参数", f"环境：{environment_label}，操作：{operation_label}"),
         ("校验操作支持关系", "Mock 校验通过，当前环境允许执行该操作"),
         ("执行操作前置检查", "Mock 前置检查完成"),
         ("生成结果数据", "Mock 结果明细已生成"),
         ("准备导出数据", "Mock 导出数据已写入任务结果"),
     ]
 
-    JobLog.objects.create(job=job, message="搜索表单2异步流程开始")
+    JobLog.objects.create(job=job, message="数据维护异步流程开始")
     job.total_steps = len(steps)
     job.save(update_fields=["total_steps"])
 
@@ -105,13 +105,13 @@ def run_search_form_2_workflow(job):
     job.stage = job.STAGE_COMPLETED
     job.progress = 98
     job.save(update_fields=["stage", "progress"])
-    JobLog.objects.create(job=job, message="[写入搜索表单2结果] 结果和导出数据已保存到任务记录")
+    JobLog.objects.create(job=job, message="[写入数据维护结果] 结果已保存到任务记录")
 
     return {
         "ok": True,
         "workflow": "search_form_2",
         "result_id": str(job.id),
-        "title": f"{environment_label} - {operation_label}执行结果",
+        "title": f"{environment_label} - {operation_label}数据维护结果",
         "executed_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "summary": {
             "total": len(rows),

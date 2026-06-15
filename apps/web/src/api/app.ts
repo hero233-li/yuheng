@@ -155,42 +155,8 @@ export interface SearchForm2Config {
   operations: SearchForm2OperationConfig[];
 }
 
-export interface SearchForm2ResultRow {
-  id: string;
-  item: string;
-  environment: string;
-  operation: string;
-  status: '成功' | '需复核';
-  message: string;
-}
-
-export interface SearchForm2Result {
-  result_id: string;
-  title: string;
-  executed_at: string;
-  summary: {
-    total: number;
-    success: number;
-    review: number;
-  };
-  request: {
-    environment: string;
-    operation: string;
-    fields: Record<string, unknown>;
-  };
-  rows: SearchForm2ResultRow[];
-  export_url: string;
-}
-
 export async function getSearchForm2Config() {
   const { data } = await apiClient.get<SearchForm2Config>('/mock/search-form-2/config/');
-  return data;
-}
-
-export async function exportSearchForm2Result(resultId: string) {
-  const { data } = await apiClient.get<Blob>(`/mock/search-form-2/results/${resultId}/export/`, {
-    responseType: 'blob',
-  });
   return data;
 }
 

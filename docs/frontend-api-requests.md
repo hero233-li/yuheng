@@ -90,7 +90,7 @@ apps/web/src/api/app.ts
 | `getJobLogs` | `GET /api/jobs/{id}/logs/` | 查询任务日志 |
 | `cancelJob` | `POST /api/jobs/{id}/cancel/` | 取消任务 |
 | `getMultiTaskTable` | `GET /api/mock/multi-task-table/` | 多维表格 mock |
-| `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 搜索表单2配置 |
+| `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 数据维护配置 |
 | `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 分组卡片搜索 |
 
 ## 页面调用方式
