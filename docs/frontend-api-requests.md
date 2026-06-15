@@ -91,7 +91,7 @@ apps/web/src/api/app.ts
 | `cancelJob` | `POST /api/jobs/{id}/cancel/` | 取消任务 |
 | `getMultiTaskTable` | `GET /api/mock/multi-task-table/` | 多维表格 mock |
 | `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 数据维护配置 |
-| `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 分组卡片搜索 |
+| `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 卡片任务搜索 |
 
 重置密码页面不需要新增专用 API，前端直接调用 `createJob` 创建 `reset_password` 异步任务，再轮询 `getJob` 展示进度。
 

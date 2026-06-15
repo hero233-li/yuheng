@@ -1,6 +1,6 @@
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { useMutation } from '@tanstack/react-query';
-import { App, Avatar, Button, Card, Col, Form, Input, Popconfirm, Row, Select, Space, Tabs, Tag, Typography } from 'antd';
+import { App, Button, Card, Col, Form, Input, Popconfirm, Row, Select, Space, Tabs, Tag, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import {
   claimGroupedTask,
@@ -11,8 +11,8 @@ import {
 
 interface GroupedCardItem {
   name: string;
-  icon: string;
-  color: string;
+  english_name: string;
+  chinese_name: string;
   active: string | number;
   added: number;
   category: string;
@@ -104,7 +104,7 @@ export function GroupedCardSearchPage() {
   }
 
   return (
-    <PageContainer title="分组卡片搜索表单" subTitle="搜索结果按 A 组、B 组页签切换展示">
+    <PageContainer title="卡片任务" subTitle="任务卡片按 A 组、B 组页签切换展示">
       <div className="page-stack">
         <ProCard>
           <Form layout="inline" onFinish={runSearch}>
@@ -149,7 +149,7 @@ export function GroupedCardSearchPage() {
 
         {cards.length === 0 && (
           <ProCard>
-            <Typography.Text type="secondary">点击搜索后按 A 组、B 组页签切换展示卡片。</Typography.Text>
+            <Typography.Text type="secondary">点击搜索后按 A 组、B 组页签切换展示卡片任务。</Typography.Text>
           </ProCard>
         )}
 
@@ -263,17 +263,18 @@ function GroupedCardGrid({
               </Button>,
             ]}
           >
-            <Space align="start" size={14}>
-              <Avatar style={{ background: item.color }}>{item.icon}</Avatar>
-              <div>
-                <Space align="center">
+            <div>
+              <Space align="center" wrap>
+                <div>
                   <Typography.Title level={4} style={{ marginTop: 0, marginBottom: 0 }}>
-                    {item.name}
+                    {item.english_name}
                   </Typography.Title>
-                  <Tag color={item.status === 'completed' ? 'success' : 'warning'}>
-                    {item.status === 'completed' ? '已完成' : '未完成'}
-                  </Tag>
-                </Space>
+                  <Typography.Text type="secondary">{item.chinese_name}</Typography.Text>
+                </div>
+                <Tag color={item.status === 'completed' ? 'success' : 'warning'}>
+                  {item.status === 'completed' ? '已完成' : '未完成'}
+                </Tag>
+              </Space>
                 <Typography.Paragraph type="secondary" className="grouped-card-description">
                   {item.description}
                 </Typography.Paragraph>
@@ -292,7 +293,6 @@ function GroupedCardGrid({
                   <Tag color={item.group === 'A组' ? 'geekblue' : 'green'}>{item.group}</Tag>
                 </Space>
               </div>
-            </Space>
           </Card>
         </Col>
       ))}

@@ -496,6 +496,7 @@ export const pageAFields = [
 | 重置密码 | `ResetPasswordPage.tsx` | 简单表单 + 执行进度 |
 | 多维任务表格 | `MultiTaskTablePage.tsx` | 多维表格 |
 | 卡片式搜索表单 | `CardSearchPage.tsx` | 卡片列表 |
+| 卡片任务 | `GroupedCardSearchPage.tsx` | 分组卡片任务 |
 | 个人中心 | `PersonalCenterPage.tsx` | 历史记录列表 |
 
 ## 前端请求规范

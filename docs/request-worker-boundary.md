@@ -28,7 +28,7 @@ worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
 | 数据维护配置 | `GET /api/mock/search-form-2/config/` | 否 |
 | 多维任务表格数据 | `GET /api/mock/multi-task-table/` | 否 |
 | 多维任务表格保存 | `POST /api/mock/multi-task-table/save/` | 否 |
-| 分组卡片搜索 | `POST /api/mock/grouped-cards/` | 否 |
+| 卡片任务搜索 | `POST /api/mock/grouped-cards/` | 否 |
 | 分组卡片完成/取消 | `POST /api/mock/grouped-cards/card-action/` | 否 |
 
 这些接口直接在 Django view 中处理，读写 SQLite 后返回 JSON。

@@ -18,14 +18,26 @@ def health(request):
 
 
 GROUPED_CARD_MOCK = [
-    {"name": "Alipay", "icon": "支", "color": "#4aa8ff", "active": "1万", "added": 484, "category": "类目1", "group": "A组", "status": "completed", "description": "A组支付类任务，已完成处理"},
-    {"name": "Angular", "icon": "A", "color": "#d33242", "active": 3306, "added": 577, "category": "类目2", "group": "A组", "status": "pending", "description": "A组前端任务，等待完成"},
-    {"name": "Ant Design", "icon": "◇", "color": "#6c8cff", "active": 7083, "added": 756, "category": "类目3", "group": "A组", "status": "completed", "description": "A组组件任务，已完成处理"},
-    {"name": "Ant Design Pro", "icon": "Pro", "color": "#111827", "active": 9472, "added": 463, "category": "类目4", "group": "A组", "status": "pending", "description": "A组后台任务，等待完成"},
-    {"name": "Bootstrap", "icon": "B", "color": "#7952b3", "active": 7553, "added": 119, "category": "类目5", "group": "B组", "status": "pending", "description": "B组样式任务，等待完成"},
-    {"name": "React", "icon": "R", "color": "#61dafb", "active": 3856, "added": 824, "category": "类目6", "group": "B组", "status": "completed", "description": "B组运行时任务，已完成处理"},
-    {"name": "Vue", "icon": "V", "color": "#42b883", "active": 8341, "added": 480, "category": "类目7", "group": "B组", "status": "pending", "description": "B组应用任务，等待完成"},
-    {"name": "Webpack", "icon": "W", "color": "#5b7cfa", "active": 9714, "added": 448, "category": "类目8", "group": "B组", "status": "completed", "description": "B组构建任务，已完成处理"},
+    {"name": "risk-profile", "english_name": "Risk Profile", "chinese_name": "风险画像", "active": 320, "added": 24, "category": "类目1", "group": "A组", "status": "pending", "description": "A组风险画像任务，等待处理"},
+    {"name": "credit-review", "english_name": "Credit Review", "chinese_name": "征信复核", "active": 418, "added": 31, "category": "类目1", "group": "A组", "status": "pending", "description": "A组征信复核任务，等待处理"},
+    {"name": "white-list", "english_name": "White List", "chinese_name": "白名单核验", "active": 276, "added": 18, "category": "类目2", "group": "A组", "status": "completed", "description": "A组白名单核验任务，已完成处理"},
+    {"name": "company-check", "english_name": "Company Check", "chinese_name": "公司校验", "active": 391, "added": 29, "category": "类目2", "group": "A组", "status": "pending", "description": "A组公司校验任务，等待处理"},
+    {"name": "legal-person", "english_name": "Legal Person", "chinese_name": "法人核验", "active": 245, "added": 16, "category": "类目3", "group": "A组", "status": "completed", "description": "A组法人核验任务，已完成处理"},
+    {"name": "card-status", "english_name": "Card Status", "chinese_name": "卡状态检查", "active": 363, "added": 21, "category": "类目3", "group": "A组", "status": "pending", "description": "A组卡状态检查任务，等待处理"},
+    {"name": "mobile-verify", "english_name": "Mobile Verify", "chinese_name": "手机号核验", "active": 512, "added": 37, "category": "类目4", "group": "A组", "status": "pending", "description": "A组手机号核验任务，等待处理"},
+    {"name": "identity-check", "english_name": "Identity Check", "chinese_name": "身份核验", "active": 470, "added": 33, "category": "类目4", "group": "A组", "status": "completed", "description": "A组身份核验任务，已完成处理"},
+    {"name": "account-match", "english_name": "Account Match", "chinese_name": "账户匹配", "active": 286, "added": 19, "category": "类目5", "group": "A组", "status": "pending", "description": "A组账户匹配任务，等待处理"},
+    {"name": "branch-route", "english_name": "Branch Route", "chinese_name": "辖行路由", "active": 341, "added": 26, "category": "类目5", "group": "A组", "status": "pending", "description": "A组辖行路由任务，等待处理"},
+    {"name": "outlet-sync", "english_name": "Outlet Sync", "chinese_name": "网点同步", "active": 299, "added": 22, "category": "类目6", "group": "A组", "status": "completed", "description": "A组网点同步任务，已完成处理"},
+    {"name": "red-shield", "english_name": "Red Shield", "chinese_name": "红盾核查", "active": 388, "added": 28, "category": "类目6", "group": "A组", "status": "pending", "description": "A组红盾核查任务，等待处理"},
+    {"name": "quota-check", "english_name": "Quota Check", "chinese_name": "额度检查", "active": 455, "added": 35, "category": "类目7", "group": "A组", "status": "pending", "description": "A组额度检查任务，等待处理"},
+    {"name": "apply-submit", "english_name": "Apply Submit", "chinese_name": "申请提交", "active": 528, "added": 42, "category": "类目7", "group": "A组", "status": "pending", "description": "A组申请提交任务，等待处理"},
+    {"name": "approve-flow", "english_name": "Approve Flow", "chinese_name": "审批流转", "active": 604, "added": 46, "category": "类目8", "group": "A组", "status": "completed", "description": "A组审批流转任务，已完成处理"},
+    {"name": "archive-result", "english_name": "Archive Result", "chinese_name": "结果归档", "active": 336, "added": 25, "category": "类目8", "group": "A组", "status": "pending", "description": "A组结果归档任务，等待处理"},
+    {"name": "batch-import", "english_name": "Batch Import", "chinese_name": "批量导入", "active": 186, "added": 12, "category": "类目9", "group": "B组", "status": "pending", "description": "B组批量导入任务，等待处理"},
+    {"name": "report-export", "english_name": "Report Export", "chinese_name": "报表导出", "active": 211, "added": 15, "category": "类目10", "group": "B组", "status": "completed", "description": "B组报表导出任务，已完成处理"},
+    {"name": "notice-send", "english_name": "Notice Send", "chinese_name": "通知发送", "active": 173, "added": 9, "category": "类目11", "group": "B组", "status": "pending", "description": "B组通知发送任务，等待处理"},
+    {"name": "data-clean", "english_name": "Data Clean", "chinese_name": "数据清理", "active": 254, "added": 17, "category": "类目12", "group": "B组", "status": "completed", "description": "B组数据清理任务，已完成处理"},
 ]
 
 GROUPED_TASK_STATE = {
@@ -293,7 +305,13 @@ def grouped_cards_mock(request):
         card
         for card in GROUPED_CARD_MOCK
         if (category == "全部" or card["category"] == category)
-        and (not keyword or keyword in card["name"].lower() or keyword in card["description"].lower())
+        and (
+            not keyword
+            or keyword in card["name"].lower()
+            or keyword in card["english_name"].lower()
+            or keyword in card["chinese_name"].lower()
+            or keyword in card["description"].lower()
+        )
     ]
     return JsonResponse({"items": cards, "task": GROUPED_TASK_STATE})
 

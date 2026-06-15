@@ -175,8 +175,8 @@ export interface GroupedTaskState {
 
 export interface GroupedCardItemDto {
   name: string;
-  icon: string;
-  color: string;
+  english_name: string;
+  chinese_name: string;
   active: string | number;
   added: number;
   category: string;
