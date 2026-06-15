@@ -61,7 +61,6 @@ const defaultPreferences = {
     '/grouped-card-search': 'single' as MenuTabMode,
     '/personal-center': 'single' as MenuTabMode,
     '/menu-two/overview': 'single' as MenuTabMode,
-    '/menu-three/overview': 'single' as MenuTabMode,
     '/system-settings': 'single' as MenuTabMode,
   },
 };

@@ -10,7 +10,6 @@ import { AppShell } from './components/AppShell';
 import { JobCreatePage } from './apps/web/JobCreatePage';
 import { JobListPage } from './apps/web/JobListPage';
 import { SettingsPage } from './apps/web/SettingsPage';
-import { PlaceholderPage } from './apps/web/PlaceholderPage';
 import { MultiTaskTablePage } from './apps/web/MultiTaskTablePage';
 import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
 import { GroupedCardSearchPage } from './apps/web/GroupedCardSearchPage';
@@ -34,7 +33,6 @@ const appRoutes = [
       { path: 'multi-task-table', element: <MultiTaskTablePage /> },
       { path: 'grouped-card-search', element: <GroupedCardSearchPage /> },
       { path: 'menu-two/overview', element: <Navigate to="/multi-task-table" replace /> },
-      { path: 'menu-three/overview', element: <PlaceholderPage title="菜单三页面" /> },
       { path: 'system-settings', element: <SettingsPage /> },
       { path: 'settings', element: <Navigate to="/system-settings" replace /> },
     ],

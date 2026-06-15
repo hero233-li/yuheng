@@ -50,7 +50,6 @@ const menuItems: AppMenuItem[] = [
     label: '一级菜单三',
     children: [
       { key: '/multi-task-table', icon: <BarsOutlined />, label: '多维任务表格' },
-      { key: '/menu-three/overview', label: '菜单三页面' },
       { key: '/personal-center', icon: <HistoryOutlined />, label: '个人中心' },
       { key: '/system-settings', icon: <SettingOutlined />, label: '系统设置' },
     ],

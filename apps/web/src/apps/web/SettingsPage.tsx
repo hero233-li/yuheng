@@ -9,7 +9,6 @@ const menuSettings = [
   { path: '/reset-password', label: '重置密码' },
   { path: '/grouped-card-search', label: '卡片任务' },
   { path: '/multi-task-table', label: '多维任务表格' },
-  { path: '/menu-three/overview', label: '菜单三页面' },
   { path: '/personal-center', label: '个人中心' },
   { path: '/system-settings', label: '系统设置' },
 ];
