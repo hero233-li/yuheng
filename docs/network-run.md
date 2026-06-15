@@ -1,8 +1,8 @@
-# 内网 Web 版运行说明
+# 内网运行说明
 
-## 目标
+## 运行模式
 
-当前项目改为前后端分离运行：
+当前运行方式：
 
 ```text
 React/Vite 前端：5174
@@ -11,24 +11,31 @@ Django API 后端：8766
 SQLite：本机数据文件
 ```
 
-项目采用 React 前端和 Python 后端分离运行。
+启动服务的电脑负责运行前端、后端和 worker。其他内网电脑通过浏览器访问前端地址。
 
-## 版本
+## 环境版本
 
-推荐版本：
+推荐：
 
 ```text
 Node：22.12.10
 Python：3.10.11
 ```
 
-Python 版本必须是 3.10。
+Python 必须是 3.10。脚本会优先使用：
+
+```text
+.venv
+Windows py -3.10
+macOS/Linux python3.10
+```
 
 ## 第一次安装
 
 Windows PowerShell：
 
 ```powershell
+git pull
 npm install
 py -3.10 -m venv .venv
 .venv\Scripts\activate
@@ -39,6 +46,7 @@ npm run backend:migrate
 macOS/Linux：
 
 ```bash
+git pull
 npm install
 python3.10 -m venv .venv
 . .venv/bin/activate
@@ -52,20 +60,15 @@ npm run backend:migrate
 npm run dev
 ```
 
-这个命令会同时启动：
+该命令启动三个子进程：
 
-```text
-backend: Django API
-worker:  本地任务执行进程
-web:     React/Vite 前端
-```
+| 子进程 | 实际命令 | 说明 |
+| --- | --- | --- |
+| backend | `npm run backend:web` | Django API |
+| worker | `npm run backend:worker` | 本地任务执行 |
+| web | `npm run dev:web` | React/Vite 前端 |
 
-默认监听：
-
-```text
-React：http://0.0.0.0:5174
-Django：http://0.0.0.0:8766
-```
+## 访问地址
 
 本机访问：
 
@@ -73,29 +76,44 @@ Django：http://0.0.0.0:8766
 http://127.0.0.1:5174
 ```
 
-内网其他电脑访问：
+内网访问：
 
 ```text
 http://启动服务电脑的IP:5174
 ```
 
-## 请求链路
-
-浏览器访问 React：
+示例：
 
 ```text
-浏览器 -> http://本机IP:5174
+http://192.168.1.20:5174
 ```
 
-前端调用后端：
+## 请求代理
+
+前端页面调用后端时使用 `/api/...`。
+
+Vite 代理链路：
 
 ```text
-浏览器 -> /api/... -> Vite proxy -> http://127.0.0.1:8766/api/...
+浏览器
+  -> http://服务电脑IP:5174/api/jobs/
+  -> Vite proxy
+  -> Django 8766 /api/jobs/
 ```
 
-这样内网其他电脑只需要访问 `5174`，后端可以继续由启动服务的电脑本机代理。
+配置位置：
 
-## 自定义端口和地址
+```text
+apps/web/vite.config.ts
+```
+
+默认代理目标：
+
+```text
+http://127.0.0.1:8766
+```
+
+## 端口和环境变量
 
 后端监听地址：
 
@@ -112,22 +130,24 @@ $env:WEB_HOST="0.0.0.0"
 npm run dev
 ```
 
-前端代理后端地址：
+前端代理后端：
 
 ```powershell
 $env:VITE_API_PROXY_TARGET="http://127.0.0.1:8766"
 npm run dev
 ```
 
-## 防火墙
+数据目录：
 
-如果其他电脑打不开：
+```powershell
+$env:AUTOMATION_DATA_DIR="D:\automation-data"
+npm run dev
+```
 
-```text
-1. 确认启动服务的电脑和访问电脑在同一内网
-2. 确认访问地址是启动服务电脑的真实 IP
-3. Windows 防火墙放行 Node.js 或 5174 端口
-4. 如果需要直接访问 Django API，再放行 8766 端口
+macOS/Linux 写法：
+
+```bash
+BACKEND_PORT=8767 npm run dev
 ```
 
 ## 单独启动
@@ -150,14 +170,100 @@ npm run backend:worker
 npm run dev:web
 ```
 
+只执行数据库迁移：
+
+```bash
+npm run backend:migrate
+```
+
 ## 构建前端
 
 ```bash
 npm run build
 ```
 
-构建产物：
+产物：
 
 ```text
 apps/web/dist/web/
+```
+
+构建产物用于静态部署或后续集成，不影响 `npm run dev`。
+
+## 防火墙
+
+如果其他电脑不能访问：
+
+```text
+1. 确认两台电脑在同一内网
+2. 确认访问的是启动服务电脑的真实 IP
+3. Windows 防火墙放行 Node.js
+4. Windows 防火墙放行 5174 端口
+5. 如需直接访问 API，再放行 8766 端口
+```
+
+PowerShell 查看本机 IP：
+
+```powershell
+ipconfig
+```
+
+## 常见问题
+
+### 1. 端口被占用
+
+修改端口：
+
+```powershell
+$env:BACKEND_PORT="8767"
+npm run dev
+```
+
+前端端口当前固定在 Vite 配置中：
+
+```text
+apps/web/vite.config.ts
+```
+
+### 2. Python 版本错误
+
+确认：
+
+```powershell
+py -3.10 --version
+```
+
+重新建虚拟环境：
+
+```powershell
+Remove-Item -Recurse -Force .venv
+py -3.10 -m venv .venv
+.venv\Scripts\activate
+pip install -r apps/backend/requirements.txt
+```
+
+### 3. 数据表不存在
+
+执行：
+
+```bash
+npm run backend:migrate
+```
+
+### 4. 页面提交后任务不动
+
+确认 worker 是否启动：
+
+```bash
+npm run backend:worker
+```
+
+### 5. 前端请求失败
+
+检查：
+
+```text
+apps/web/.env.web
+apps/web/vite.config.ts
+scripts/dev-network.mjs
 ```

@@ -70,7 +70,7 @@ defaultValue 使用字符串
 多选 Select：页面控件允许用户一次勾选多个值，提交给后端的是数组。
 ```
 
-执行产品申请流程里的层级字段采用“一对多候选 + 单选控件”：
+产品申请里的层级字段采用“一对多候选 + 单选控件”：
 
 ```text
 环境：单选
@@ -345,13 +345,13 @@ submit = true
 
 ```json
 {
-  "name": "搜索任务",
+  "name": "产品申请",
   "search_form": {
-    "environment": ["env_1"],
-    "product": ["product_a"],
-    "origin": ["origin_1"],
-    "region": ["region_1"],
-    "city": ["city_1"],
+    "environment": "env_1",
+    "product": "product_a",
+    "origin": "origin_1",
+    "region": "region_1",
+    "city": "city_1",
     "personName": "张三",
     "certificateNo": "110101199001011234",
     "phone": "13800000000",

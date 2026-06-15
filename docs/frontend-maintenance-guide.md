@@ -210,7 +210,7 @@ const mutation = useMutation({
 
 ## 新增字段
 
-当前“执行产品申请流程”的字段配置在：
+当前“产品申请”的字段配置在：
 
 ```text
 apps/web/src/apps/web/searchFormConfig.ts

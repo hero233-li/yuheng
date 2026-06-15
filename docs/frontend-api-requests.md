@@ -1,15 +1,30 @@
 # 前端请求后端说明
 
-前端请求封装在：
+## 文件位置
+
+前端请求封装：
 
 ```text
 apps/web/src/api/client.ts
 apps/web/src/api/app.ts
 ```
 
+后端路由：
+
+```text
+apps/backend/automation_backend/urls.py
+```
+
+后端接口实现：
+
+```text
+apps/backend/core/views.py
+apps/backend/jobs/views.py
+```
+
 ## 请求基础地址
 
-前端环境变量：
+前端环境文件：
 
 ```text
 apps/web/.env.web
@@ -18,28 +33,48 @@ apps/web/.env.web
 当前配置：
 
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:8766/api
+APP_MODE=web
+VITE_API_BASE_URL=/api
 ```
+
+开发启动时，Vite 还配置了 `/api` 代理：
+
+```text
+apps/web/vite.config.ts
+```
+
+页面使用相对路径 `/api/...`，会走 Vite proxy。
+
+内网访问时不要把这里写成 `http://127.0.0.1:8766/api`，否则其他电脑的浏览器会请求它自己的本机。
 
 ## Axios 实例
 
-统一请求实例在：
+文件：
+
+```text
+apps/web/src/api/client.ts
+```
+
+当前逻辑：
 
 ```ts
-// apps/web/src/api/client.ts
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15000,
 });
 ```
 
-所有接口都通过这个 `apiClient` 调用。
+响应拦截器会把后端 `detail` 字段转成前端 `Error`：
 
-如果以后要加 token、统一错误提示、请求日志，可以在这里加拦截器。
+```ts
+const message = error.response?.data?.detail || error.message || '请求失败';
+```
 
-## 本机接口
+后续要加 token、请求日志、统一提示，都在这里做。
 
-本机接口在：
+## API 方法
+
+文件：
 
 ```text
 apps/web/src/api/app.ts
@@ -47,63 +82,25 @@ apps/web/src/api/app.ts
 
 当前主要方法：
 
-```ts
-login(payload)
-createJob(payload)
-listJobs()
-getJob(jobId)
-getJobLogs(jobId)
-cancelJob(jobId)
-getSettings()
-updateSettings(payload)
-```
+| 方法 | 后端接口 | 说明 |
+| --- | --- | --- |
+| `login` | `POST /api/auth/login/` | 登录 |
+| `getSettings` | `GET /api/settings/` | 获取设置 |
+| `updateSettings` | `PUT /api/settings/` | 更新设置 |
+| `createJob` | `POST /api/jobs/` | 创建异步任务 |
+| `listJobs` | `GET /api/jobs/` | 查询任务列表 |
+| `getJob` | `GET /api/jobs/{id}/` | 查询任务详情 |
+| `getJobLogs` | `GET /api/jobs/{id}/logs/` | 查询任务日志 |
+| `cancelJob` | `POST /api/jobs/{id}/cancel/` | 取消任务 |
+| `getMultiTaskTable` | `GET /api/mock/multi-task-table/` | 多维表格 mock |
+| `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 搜索表单2配置 |
+| `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 分组卡片搜索 |
 
-登录接口：
+## 页面调用方式
 
-```ts
-export async function login(payload: { username: string; password: string }) {
-  const { data } = await apiClient.post<LoginResult>('/auth/login/', payload);
-  return data;
-}
-```
+查询接口使用 TanStack Query：
 
-默认账号：
-
-```text
-用户名：user
-密码：terminal001
-```
-
-密码默认等于当前终端名。
-
-例如提交搜索任务：
-
-```ts
-export async function createJob(payload: Record<string, unknown>) {
-  const { data } = await apiClient.post<Job>('/jobs/', payload);
-  return data;
-}
-```
-
-实际请求地址是：
-
-```text
-POST http://127.0.0.1:8766/api/jobs/
-```
-
-因为 `baseURL` 已经包含：
-
-```text
-http://127.0.0.1:8766/api
-```
-
-## 页面里怎么调用
-
-页面通过 TanStack Query 调用接口。
-
-查询列表：
-
-```ts
+```tsx
 const jobsQuery = useQuery({
   queryKey: ['jobs'],
   queryFn: listJobs,
@@ -111,102 +108,122 @@ const jobsQuery = useQuery({
 });
 ```
 
-提交任务：
+提交接口使用 mutation：
 
-```ts
-const mutation = useMutation({
+```tsx
+const createMutation = useMutation({
   mutationFn: createJob,
-  onSuccess: async (job) => {
-    await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['jobs'] });
   },
 });
 ```
 
-点击搜索时：
+点击按钮：
 
-```ts
-mutation.mutate(buildSubmitPayload(values));
+```tsx
+createMutation.mutate(payload);
 ```
 
-## 新增一个后端接口
+## 新增普通接口
 
-假设后端新增：
+示例：新增页面 A 查询接口。
 
-```text
-POST /api/jobs/{id}/retry/
+### 1. 后端加 view
+
+```python
+def page_a_items(request):
+    return JsonResponse({"items": []})
 ```
 
-前端在 `apps/web/src/api/app.ts` 添加：
+### 2. 后端加路由
+
+```python
+path("api/page-a/items/", core_views.page_a_items),
+```
+
+### 3. 前端加 API 方法
 
 ```ts
-export async function retryJob(jobId: string) {
-  const { data } = await apiClient.post<Job>(`/jobs/${jobId}/retry/`);
+export async function listPageAItems() {
+  const { data } = await apiClient.get('/page-a/items/');
   return data;
 }
 ```
 
-页面中使用：
+### 4. 页面调用
 
-```ts
-const retryMutation = useMutation({
-  mutationFn: retryJob,
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+```tsx
+const query = useQuery({
+  queryKey: ['page-a-items'],
+  queryFn: listPageAItems,
 });
 ```
 
-## 后端对应位置
+## 新增耗时接口
 
-Django 路由在：
+耗时业务不要新增一个“直接执行接口”，而是创建 Job。
 
-```text
-apps/backend/automation_backend/urls.py
+前端：
+
+```ts
+await createJob({
+  name: '流程A',
+  workflow: 'flow_a',
+  biz_payload: JSON.stringify(values),
+});
 ```
 
-终端任务接口在：
-
-```text
-apps/backend/jobs/views.py
-```
-
-本机设置在：
-
-```text
-apps/backend/core/views.py
-```
-
-## 搜索任务请求数据
-
-搜索页面提交的数据由：
-
-```text
-apps/web/src/apps/web/JobCreatePage.tsx
-```
-
-里的 `buildSubmitPayload(values)` 生成。
-
-数据结构：
-
-```json
-{
-  "name": "搜索任务",
-  "search_form": {
-    "environment": "env_1",
-    "product": "product_a",
-    "origin": "origin_1",
-    "region": "region_1",
-    "city": "city_1",
-    "personName": "张三",
-    "certificateNo": "110101199001011234",
-    "phone": "13800000000"
-  },
-  "biz_payload": "{...}"
-}
-```
-
-后端会存入 `jobs_job.payload`。
-
-Mock 执行流程读取入口：
+后端 worker：
 
 ```text
 apps/backend/workflows/registry.py
 ```
+
+增加 `flow_a` 分发和执行函数。
+
+## 登录协议
+
+默认账号：
+
+```text
+user / terminal001
+```
+
+登录响应：
+
+```json
+{
+  "ok": true,
+  "username": "user",
+  "terminal_name": "terminal001",
+  "machine_name": "terminal001"
+}
+```
+
+前端存储：
+
+```text
+apps/web/src/stores/authStore.ts
+localStorage key: automation_auth
+```
+
+## 错误返回约定
+
+后端推荐错误格式：
+
+```json
+{
+  "detail": "错误说明"
+}
+```
+
+前端会自动转成 `Error.message`。
+
+## 调试建议
+
+1. 浏览器 Network 看请求 URL。
+2. 确认 Vite proxy 是否启动。
+3. 在启动服务的电脑上直接访问 `http://127.0.0.1:8766/api/health/`。
+4. 后端报错看启动后端的终端。
+5. worker 任务不执行时看 `npm run backend:worker` 输出。

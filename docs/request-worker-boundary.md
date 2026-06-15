@@ -1,66 +1,146 @@
 # 前端请求与 worker 边界
 
-本项目采用“Django API + 本地 SQLite 队列 + 本地 worker”的模式。
+本文说明哪些前端请求应该立即由 Django 返回，哪些请求应该创建异步任务交给 worker 执行。
 
-不是所有请求都走 worker。判断标准看这个请求是否是耗时业务动作。
-
-## 不走 worker
-
-这些请求由前端直接请求 Django API，后端立即返回：
-
-| 类型 | 示例 | 原因 |
-| --- | --- | --- |
-| 页面配置 | 搜索表单配置、环境/操作下拉配置 | 只读配置，返回快 |
-| 列表查询 | 多维表格主任务、子任务、卡片 mock 数据 | 查询数据，不执行自动化 |
-| 普通编辑 | 新增/编辑/删除表格行、子任务 | 本地数据维护，响应快 |
-| 状态查询 | 查询 job 状态、查询日志 | 轮询状态，不产生新任务 |
-| 系统设置 | 本机设置、外观设置、菜单设置 | 本地配置读写 |
-| 文件下载 | 下载已经生成好的结果文件 | 不再执行任务，只读取结果 |
-
-## 走 worker
-
-这些请求必须创建 job，由 worker 异步执行：
-
-| 类型 | 示例 | 原因 |
-| --- | --- | --- |
-| 自动化流程 | 执行产品申请流程 | 可能耗时，需要排队 |
-| 业务执行按钮 | 搜索表单2点击执行 | 会生成业务结果，需要异步 |
-| 批量处理 | 一键完成、一键补件、批量提交审批 | 后续可能处理大量数据 |
-| 文件生成 | 大型导出、报表生成 | 可能耗时，不能阻塞 API |
-| 外部系统调用 | 登录、提交、审批、结果确认 | 网络不稳定，需要日志和失败记录 |
-
-## 标准流程
-
-执行类页面统一使用这个流程：
+## 总原则
 
 ```text
-前端点击执行
-  -> POST /api/jobs/
-  -> Django 创建 Job，立即返回 job_id
-  -> worker 串行领取 pending job
-  -> worker 执行业务流程，写日志、进度、结果
-  -> 前端轮询 GET /api/jobs/{job_id}/
-  -> 成功后展示 job.result
-  -> 如需导出，再请求导出接口读取 job.result
+页面配置、查询、登录、设置、轻量 mock：普通 API
+耗时流程、自动化执行、批量处理、需要进度日志的动作：Job + worker
 ```
 
-## workflow 字段
+前端永远只请求 Django API，不直接调用 worker。
 
-创建 job 时必须传 `workflow`，worker 根据它分发不同流程：
+worker 只从 SQLite 任务表领取任务，不对外提供 HTTP 服务。
+
+## 普通 API
+
+普通 API 适合立刻返回结果，页面不会长时间等待。
+
+当前示例：
+
+| 场景 | 接口 | 是否走 worker |
+| --- | --- | --- |
+| 健康检查 | `GET /api/health/` | 否 |
+| 登录 | `POST /api/auth/login/` | 否 |
+| 系统设置读取 | `GET /api/settings/` | 否 |
+| 系统设置保存 | `PUT /api/settings/` | 否 |
+| 任务列表查询 | `GET /api/jobs/` | 否 |
+| 任务详情查询 | `GET /api/jobs/{id}/` | 否 |
+| 任务日志查询 | `GET /api/jobs/{id}/logs/` | 否 |
+| 搜索表单配置 | `GET /api/mock/search-form-2/config/` | 否 |
+| 多维任务表格数据 | `GET /api/mock/multi-task-table/` | 否 |
+| 多维任务表格保存 | `POST /api/mock/multi-task-table/save/` | 否 |
+| 分组卡片搜索 | `POST /api/mock/grouped-cards/` | 否 |
+| 分组卡片完成/取消 | `POST /api/mock/grouped-cards/card-action/` | 否 |
+
+这些接口直接在 Django view 中处理，读写 SQLite 后返回 JSON。
+
+## 异步 Job
+
+异步 Job 适合需要排队、执行进度、执行日志、可取消、可失败重试的流程。
+
+当前示例：
+
+| 场景 | 创建接口 | worker workflow |
+| --- | --- | --- |
+| 产品申请 | `POST /api/jobs/` | `product_apply` |
+| 搜索表单2执行 | `POST /api/jobs/` | `search_form_2` |
+
+前端创建任务后不等待业务执行完成，只拿到 `job_id`：
 
 ```json
 {
-  "name": "搜索表单2-环境1-操作1",
-  "workflow": "search_form_2",
-  "search_form": {},
-  "biz_payload": "{}"
+  "id": "job-id",
+  "status": "pending",
+  "stage": "submitted",
+  "progress": 5
 }
 ```
 
-当前 workflow：
+之后前端轮询：
 
-| workflow | 页面 | 说明 |
-| --- | --- | --- |
-| `product_apply` | 执行产品申请流程 | 默认流程，不传时也按它执行 |
-| `search_form_2` | 搜索表单2 | 固定环境/操作的异步执行 |
+```text
+GET /api/jobs/{id}/
+GET /api/jobs/{id}/logs/
+```
 
+worker 执行时持续更新：
+
+```text
+status
+stage
+progress
+result
+logs
+```
+
+## 产品申请链路
+
+```text
+React 产品申请页面
+  -> POST /api/jobs/
+  -> Django 创建 Job
+  -> SQLite 写入 pending
+  -> worker 领取 pending
+  -> workflows/registry.py 执行 product_apply
+  -> 写入阶段、进度、日志、结果
+  -> React 轮询并展示
+```
+
+## 如何判断新接口走不走 worker
+
+使用普通 API 的条件：
+
+```text
+1. 通常 1 秒内返回
+2. 只是查询、配置、保存页面状态
+3. 不需要进度条
+4. 不需要执行日志
+5. 失败后用户重新点一次即可
+```
+
+使用 worker 的条件：
+
+```text
+1. 可能执行很多秒或很多分钟
+2. 要排队，不能多个流程互相抢资源
+3. 要展示执行节点和日志
+4. 要支持取消、失败、结果留痕
+5. 后续可能替换为真实自动化脚本
+```
+
+## 新增 worker 流程
+
+1. 前端调用 `createJob`，传入唯一 `workflow`：
+
+```ts
+await createJob({
+  name: '流程A',
+  workflow: 'flow_a',
+  search_form: values,
+  biz_payload: JSON.stringify(values),
+});
+```
+
+2. 后端在 `apps/backend/workflows/registry.py` 增加分发：
+
+```python
+if workflow == "flow_a":
+    return run_flow_a_workflow(job)
+```
+
+3. worker 函数内更新进度、日志、结果。
+
+4. 前端根据后端返回的 `stage`、`progress`、`logs` 展示。
+
+## 不要做的事
+
+```text
+不要让前端直接请求 worker
+不要让耗时自动化在普通 API 里同步执行
+不要把状态步骤写死在前端
+不要让页面自己假装执行成功
+```
+
+页面可以决定展示样式，但执行状态、执行节点、日志、结果应以后端返回为准。
