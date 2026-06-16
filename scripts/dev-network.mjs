@@ -1,18 +1,37 @@
 import { spawn } from 'node:child_process';
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npm = getNpmCommand();
 const commands = [
-  ['backend', [npm, ['run', 'backend:web']]],
-  ['worker', [npm, ['run', 'backend:worker']]],
-  ['web', [npm, ['run', 'dev:web']]],
+  ['backend', npmArgs('backend:web')],
+  ['worker', npmArgs('backend:worker')],
+  ['web', npmArgs('dev:web')],
 ];
 
 const children = [];
 
-function start(label, command, args) {
+function getNpmCommand() {
+  if (process.env.npm_execpath) {
+    return {
+      command: process.execPath,
+      baseArgs: [process.env.npm_execpath],
+      shell: false,
+    };
+  }
+  return {
+    command: process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    baseArgs: [],
+    shell: process.platform === 'win32',
+  };
+}
+
+function npmArgs(scriptName) {
+  return [npm.command, [...npm.baseArgs, 'run', scriptName], npm.shell];
+}
+
+function start(label, command, args, shell) {
   const child = spawn(command, args, {
     cwd: process.cwd(),
-    shell: false,
+    shell,
     env: {
       ...process.env,
       BACKEND_HOST: process.env.BACKEND_HOST || '0.0.0.0',
@@ -22,6 +41,12 @@ function start(label, command, args) {
   });
 
   children.push(child);
+
+  child.on('error', (error) => {
+    process.stderr.write(`[${label}] failed to start: ${error.message}\n`);
+    stopAll();
+    process.exit(1);
+  });
 
   child.stdout.on('data', (chunk) => {
     process.stdout.write(prefix(label, chunk));
@@ -68,6 +93,6 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-for (const [label, [command, args]] of commands) {
-  start(label, command, args);
+for (const [label, [command, args, shell]] of commands) {
+  start(label, command, args, shell);
 }
