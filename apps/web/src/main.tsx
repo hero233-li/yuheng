@@ -7,14 +7,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
-import { JobCreatePage } from './apps/web/JobCreatePage';
-import { JobListPage } from './apps/web/JobListPage';
-import { SettingsPage } from './apps/web/SettingsPage';
-import { MultiTaskTablePage } from './apps/web/MultiTaskTablePage';
-import { PersonalCenterPage } from './apps/web/PersonalCenterPage';
-import { GroupedCardSearchPage } from './apps/web/GroupedCardSearchPage';
-import { SearchForm2Page } from './apps/web/SearchForm2Page';
-import { ResetPasswordPage } from './apps/web/ResetPasswordPage';
+import { JobCreatePage } from './apps/web/page/JobCreatePage';
+import { JobListPage } from './apps/web/page/JobListPage';
+import { SettingsPage } from './apps/web/page/SettingsPage';
+import { MultiTaskTablePage } from './apps/web/page/MultiTaskTablePage';
+import { PersonalCenterPage } from './apps/web/page/PersonalCenterPage';
+import { GroupedCardSearchPage } from './apps/web/page/GroupedCardSearchPage';
+import { SearchForm2Page } from './apps/web/page/SearchForm2Page';
+import { ResetPasswordPage } from './apps/web/page/ResetPasswordPage';
+import {RISK050009} from './apps/web/page/RISK/RISK050009'
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const appRoutes = [
       { path: 'product-apply', element: <JobCreatePage /> },
       { path: 'search-form-2', element: <SearchForm2Page /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
+      { path: 'risk-050009', element: <RISK050009 /> },
       { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
       { path: 'jobs', element: <JobListPage /> },
       { path: 'personal-center', element: <PersonalCenterPage /> },

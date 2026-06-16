@@ -222,6 +222,10 @@ body {
 }
 
 .ant-switch {
+  min-width: 40px;
+}
+
+.form-switch-with-label {
   min-width: 120px;
 }
 

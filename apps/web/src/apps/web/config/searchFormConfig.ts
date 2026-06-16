@@ -15,11 +15,13 @@ export interface FieldConfig {
   submit: boolean;
   required?: boolean;
   multiple?: boolean;
+  searchable?: boolean;
   placeholder?: string;
   defaultValue?: unknown;
   options?: SelectOption[];
   checkedLabel?: string;
   uncheckedLabel?: string;
+  switchWidth?: number | string;
   visibleWhen?: {
     field: string;
     value: unknown;
@@ -53,36 +55,39 @@ interface ProductConfig {
 }
 
 const environments: SelectOption[] = [
-  { label: '环境1', value: 'env_1' },
-  { label: '环境2', value: 'env_2' },
-  { label: '环境3', value: 'env_3' },
+  { label: 'UAT1', value: 'UAT1' },
+  { label: 'UAT2', value: 'UAT2' },
+  { label: 'UATC', value: 'UATC' },
 ];
 
 const productCatalog: ProductConfig[] = [
   {
-    id: 'product_a',
-    label: '产品A',
-    environmentIds: ['env_1', 'env_2', 'env_3'],
+    id: '交银人才贷',
+    label: '交银人才贷',
+    environmentIds: ['UAT1', 'UAT2', 'UATC'],
     locations: [
       {
-        id: 'location_1',
-        label: '所在地1',
+        id: '广东省汕头市',
+        label: '广东省汕头市',
         jurisdictions: [
           {
-            id: 'jurisdiction_1',
-            label: '辖行1',
-            outlets: [{ id: 'outlet_1', label: '网点1' }],
+            id: '汕头分行',
+            label: '汕头分行',
+             outlets: [
+              { id: '汕头分行营业部', label: '汕头分行营业部' },
+              { id: '汕头第二支行', label: '汕头第二支行' },
+            ],
           },
           {
             id: 'jurisdiction_2',
-            label: '辖行2',
-            outlets: [{ id: 'outlet_2', label: '网点2' }],
+            label: '汕头分行2',
+            outlets: [{ id: 'outlet_2', label: '汕头支行' }],
           },
         ],
       },
       {
         id: 'location_3',
-        label: '所在地3',
+        label: '湖南省长沙市',
         jurisdictions: [
           {
             id: 'jurisdiction_4',
@@ -100,12 +105,14 @@ const productCatalog: ProductConfig[] = [
       certificateNo: { required: true },
       phone: { required: true },
       cardNo: { required: true },
+      companyName: { required: true },
+      creditCode: { required: true },
     },
   },
   {
     id: 'product_b',
     label: '产品B',
-    environmentIds: ['env_1', 'env_2'],
+    environmentIds: ['UAT1', 'UAT2'],
     locations: [
       {
         id: 'location_2',
@@ -123,8 +130,8 @@ const productCatalog: ProductConfig[] = [
       personName: { required: false, placeholder: '产品B姓名非必填' },
       certificateNo: { required: true },
       phone: { required: false },
-      companyName: { required: true },
-      creditCode: { required: true },
+      // companyName: { required: true },
+      // creditCode: { required: true },
     },
   },
 ];
@@ -194,37 +201,37 @@ const commonFields: FieldConfig[] = [
     name: 'whitelist',
     label: '白名单',
     type: 'switch',
-    span: 6,
+    span: 2,
     editable: true,
     visible: true,
     submit: true,
     defaultValue: true,
-    checkedLabel: '白名单自动发送',
-    uncheckedLabel: '白名单不上送',
+    checkedLabel: '',
+    uncheckedLabel: '',
   },
   {
     name: 'redShield',
     label: '红盾',
     type: 'switch',
-    span: 6,
+    span: 2,
     editable: true,
     visible: true,
     submit: true,
     defaultValue: false,
-    checkedLabel: '红盾自动发送',
-    uncheckedLabel: '红盾不上送',
+    checkedLabel: '',
+    uncheckedLabel: '',
   },
   {
     name: 'creditReport',
     label: '征信',
     type: 'switch',
-    span: 6,
+    span: 2,
     editable: true,
     visible: true,
     submit: true,
-    defaultValue: false,
-    checkedLabel: '征信自动发送',
-    uncheckedLabel: '征信不上送',
+    defaultValue: true,
+    checkedLabel: '',
+    uncheckedLabel: '',
   },
   {
     name: 'legalPerson',
@@ -234,9 +241,10 @@ const commonFields: FieldConfig[] = [
     editable: true,
     visible: true,
     submit: true,
-    defaultValue: false,
-    checkedLabel: '法人自动发送',
-    uncheckedLabel: '法人不上送',
+    defaultValue: true,
+    switchWidth:44,
+    checkedLabel: '法人',
+    uncheckedLabel: '股东',
   },
 ];
 
@@ -270,7 +278,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       name: 'environment',
       label: '环境',
       type: 'select',
-      span: 4,
+      span: 3,
       editable: true,
       visible: true,
       submit: true,
@@ -282,17 +290,19 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       name: 'product',
       label: '产品',
       type: 'select',
-      span: 5,
+      span: 6,
       editable: true,
       visible: true,
       submit: true,
       required: true,
+      searchable: true,
+      placeholder: '输入产品名称搜索',
       defaultValue: productOptions[0]?.value,
       options: productOptions,
     },
     {
       name: 'location',
-      label: '所在地',
+      label: '客户所在地',
       type: 'select',
       span: 5,
       editable: true,
@@ -304,7 +314,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
     },
     {
       name: 'jurisdiction',
-      label: '辖行',
+      label: '辖行名称',
       type: 'select',
       span: 5,
       editable: true,
@@ -316,7 +326,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
     },
     {
       name: 'outlet',
-      label: '网点',
+      label: '网点名称',
       type: 'select',
       span: 5,
       editable: true,
@@ -352,8 +362,8 @@ function applyDynamicFieldRules(field: FieldConfig, values: Record<string, unkno
     return {
       ...field,
       editable: true,
-      checkedLabel: '法人自动发送',
-      uncheckedLabel: '法人不上送',
+      checkedLabel: '法人',
+      uncheckedLabel: '股东',
     };
   }
   return {

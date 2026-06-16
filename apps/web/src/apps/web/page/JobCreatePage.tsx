@@ -18,15 +18,15 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
-import { createJob, getJob, getJobLogs, listJobs } from '../../api/app';
-import type { Job, JobLog, JobStage, JobStatus } from '../../types';
+import { createJob, getJob, getJobLogs, listJobs } from '../../../api/app';
+import type { Job, JobLog, JobStage, JobStatus } from '../../../types';
 import {
   buildSearchConfig,
   cascadeResetMap,
   getInitialSearchValues,
   searchPageBehavior,
   type FieldConfig,
-} from './searchFormConfig';
+} from '../config/searchFormConfig';
 
 const statusColor: Record<JobStatus, string> = {
   pending: 'default',
@@ -156,15 +156,27 @@ export function JobCreatePage() {
           mode={field.multiple ? 'multiple' : undefined}
           options={getFieldOptions(field)}
           allowClear
+          showSearch={field.searchable}
+          optionFilterProp="label"
+          filterOption={(input, option) => {
+            const keyword = input.trim().toLowerCase();
+            const label = String(option?.label ?? '').toLowerCase();
+            const value = String(option?.value ?? '').toLowerCase();
+            return label.includes(keyword) || value.includes(keyword);
+          }}
         />
       );
     }
     if (field.type === 'switch') {
+      const hasSwitchLabel = Boolean(field.checkedLabel || field.uncheckedLabel);
       return (
         <Switch
+          className={hasSwitchLabel ? 'form-switch-with-label' : undefined}
           disabled={!field.editable}
+          size="default"
           checkedChildren={field.checkedLabel}
           unCheckedChildren={field.uncheckedLabel}
+          style={field.switchWidth ? { minWidth: field.switchWidth, width: field.switchWidth } : undefined}
         />
       );
     }

@@ -2,9 +2,9 @@ import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Descriptions, Drawer, Space, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { getJobLogs, listJobs } from '../../api/app';
+import { getJobLogs, listJobs } from '../../../api/app';
 import { useState } from 'react';
-import type { Job, JobLog, JobStatus } from '../../types';
+import type { Job, JobLog, JobStatus } from '../../../types';
 
 const statusColor: Record<JobStatus, string> = {
   pending: 'default',

@@ -3,15 +3,15 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, Col, Form, Input, Progress, Row, Select, Space, Tag, Typography } from 'antd';
 import { useState } from 'react';
-import { createJob, getJob } from '../../api/app';
+import { createJob, getJob } from '../../../../api/app';
 
 const environmentOptions = [
-  { label: '环境1', value: 'env_1' },
-  { label: '环境2', value: 'env_2' },
-  { label: '环境3', value: 'env_3' },
+  { label: 'UAT1', value: 'UAT1' },
+  { label: 'UAT2', value: 'UAT2' },
+  { label: 'UATC', value: 'UATC' },
 ];
 
-export function ResetPasswordPage() {
+export function RISK050009() {
   const [form] = Form.useForm();
   const { message } = App.useApp();
   const [jobId, setJobId] = useState<string | null>(null);
@@ -55,28 +55,29 @@ export function ResetPasswordPage() {
         <ProCard title="执行条件">
           <Form
             form={form}
+
             layout="vertical"
             initialValues={{ environment: environmentOptions[0].value }}
             onFinish={handleExecute}
           >
-            <Row gutter={16}>
-              <Col span={6}>
+            <Row gutter={8}  justify="center">
+              <Col span={4}>
                 <Form.Item label="环境" name="environment" rules={[{ required: true, message: '请选择环境' }]}>
                   <Select options={environmentOptions} onChange={() => setJobId(null)} />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col span={4}>
                 <Form.Item
-                  label="用户名"
+                  label="柜员号"
                   name="username"
-                  rules={[{ required: true, message: '请输入用户名' }]}
+                  rules={[{ required: true, message: '请输入柜员号' }]}
                 >
-                  <Input placeholder="请输入用户名" onChange={() => setJobId(null)} />
+                  <Input placeholder="请输入柜员号" onChange={() => setJobId(null)} />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Space>
+            <Space className="form-action-center">
               <Button type="primary" htmlType="submit" icon={<PlayCircleOutlined />} loading={executeMutation.isPending}>
                 执行
               </Button>

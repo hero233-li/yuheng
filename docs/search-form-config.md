@@ -126,6 +126,7 @@ defaultValue 使用数组
   defaultValue: true,
   checkedLabel: '白名单自动发送',
   uncheckedLabel: '白名单不上送',
+  switchWidth: 120,
 }
 ```
 
@@ -137,7 +138,33 @@ defaultValue 使用 true / false
 提交给后端时是 boolean
 checkedLabel 是打开时显示的文案
 uncheckedLabel 是关闭时显示的文案
+switchWidth 可选，控制开关条本体长度
 ```
+
+`span` 和 `switchWidth` 控制的不是同一个东西：
+
+| 配置 | 控制内容 |
+| --- | --- |
+| `span` | 外层表单项占几格，基于 24 栅格 |
+| `switchWidth` | switch 开关条本体宽度 |
+
+例如：
+
+```ts
+{
+  name: 'whitelist',
+  label: '白名单',
+  type: 'switch',
+  span: 3,
+  checkedLabel: '',
+  uncheckedLabel: '',
+  switchWidth: 44,
+}
+```
+
+上面表示：这个字段外层只占 3 格，开关条本体宽度是 44px。
+
+如果 `checkedLabel` / `uncheckedLabel` 有文字，页面会默认给 switch 一个较大的最小宽度，避免文字被挤压。没有文字时，switch 会使用 Ant Design 默认短开关。
 
 ## 产品目录
 
@@ -272,9 +299,11 @@ extraFields: [
 | `submit` | 是否提交给后端 |
 | `required` | 是否必填 |
 | `multiple` | select 是否多选 |
+| `searchable` | select 是否允许输入搜索 |
 | `placeholder` | 输入提示 |
 | `defaultValue` | 默认值 |
 | `options` | select 下拉选项 |
+| `switchWidth` | switch 本体宽度，只对 `type: 'switch'` 生效 |
 
 宽度：
 
@@ -287,6 +316,31 @@ span: 4   一行六个
 ```
 
 每一个搜索项都可以单独控制 `span`，包括公共字段、产品专属字段、环境、产品、所在地、辖行、网点。
+
+## 下拉搜索
+
+产品较多时，给 select 字段配置：
+
+```ts
+{
+  name: 'product',
+  label: '产品',
+  type: 'select',
+  span: 5,
+  searchable: true,
+  placeholder: '输入产品名称搜索',
+}
+```
+
+打开后，用户可以在下拉框里输入关键字，前端会按 `label` 和 `value` 搜索。
+
+后续如果所在地、辖行、网点也很多，同样可以加：
+
+```ts
+searchable: true
+```
+
+如果选项数量达到几千或上万，建议改成后端远程搜索，不要一次性把所有选项都放到前端。
 
 例如让姓名更长：
 

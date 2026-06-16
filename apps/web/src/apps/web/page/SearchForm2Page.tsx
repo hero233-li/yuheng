@@ -8,7 +8,7 @@ import {
   getJob,
   getSearchForm2Config,
   type SearchForm2FieldConfig,
-} from '../../api/app';
+} from '../../../api/app';
 
 export function SearchForm2Page() {
   const [form] = Form.useForm();

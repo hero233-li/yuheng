@@ -7,7 +7,7 @@ import {
   returnGroupedTask,
   searchGroupedCards,
   type GroupedTaskState,
-} from '../../api/app';
+} from '../../../api/app';
 
 interface GroupedCardItem {
   name: string;
@@ -267,31 +267,14 @@ function GroupedCardGrid({
               <Space align="center" wrap>
                 <div>
                   <Typography.Title level={4} style={{ marginTop: 0, marginBottom: 0 }}>
-                    {item.english_name}
+                    {item.chinese_name}
                   </Typography.Title>
-                  <Typography.Text type="secondary">{item.chinese_name}</Typography.Text>
+                  <Typography.Text type="secondary">{item.english_name}</Typography.Text>
                 </div>
                 <Tag color={item.status === 'completed' ? 'success' : 'warning'}>
                   {item.status === 'completed' ? '已完成' : '未完成'}
                 </Tag>
               </Space>
-                <Typography.Paragraph type="secondary" className="grouped-card-description">
-                  {item.description}
-                </Typography.Paragraph>
-                <Space size={34}>
-                  <div>
-                    <Typography.Text type="secondary">活跃用户</Typography.Text>
-                    <Typography.Title level={3}>{item.active}</Typography.Title>
-                  </div>
-                  <div>
-                    <Typography.Text type="secondary">新增用户</Typography.Text>
-                    <Typography.Title level={3}>{item.added}</Typography.Title>
-                  </div>
-                </Space>
-                <Space>
-                  <Tag color="blue">{item.category}</Tag>
-                  <Tag color={item.group === 'A组' ? 'geekblue' : 'green'}>{item.group}</Tag>
-                </Space>
               </div>
           </Card>
         </Col>

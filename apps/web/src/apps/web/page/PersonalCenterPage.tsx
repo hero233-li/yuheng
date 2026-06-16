@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Descriptions, Drawer, Input, Progress, Radio, Space, Statistic, Tag, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
-import { getInvocationRecord, getInvocationSummary, type InvocationRecordDto } from '../../api/app';
+import { getInvocationRecord, getInvocationSummary, type InvocationRecordDto } from '../../../api/app';
 
 type PeriodKey = 'day' | 'week' | 'month' | 'year';
 type DetailKey = 'request_params' | 'response_params' | 'response_log';

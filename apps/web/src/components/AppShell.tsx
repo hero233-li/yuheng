@@ -32,19 +32,30 @@ const menuItems: AppMenuItem[] = [
   {
     key: 'group-one',
     icon: <AppstoreOutlined />,
-    label: '一级菜单一',
+    label: '经营贷全流程',
     children: [
       { key: '/product-apply', icon: <PlayCircleOutlined />, label: '产品申请' },
-      { key: '/search-form-2', icon: <PlayCircleOutlined />, label: '数据维护' },
-      { key: '/reset-password', icon: <PlayCircleOutlined />, label: '重置密码' },
+      { key: '/grouped-card-search', icon: <AppstoreOutlined />, label: '核实审批' },
     ],
   },
   {
     key: 'group-two',
     icon: <MenuOutlined />,
-    label: '一级菜单二',
+    label: '数据维护',
     children: [
-      { key: '/grouped-card-search', icon: <AppstoreOutlined />, label: '卡片任务' },
+        { key: '/search-form-2', icon: <PlayCircleOutlined />, label: '数据维护' },
+        { key: '/reset-password', icon: <PlayCircleOutlined />, label: '重置密码' },
+    ],
+  },
+  {
+    key: 'group-four',
+    icon: <MenuOutlined />,
+    label: '高频交易',
+    children: [
+        { key: 'risk', icon: <PlayCircleOutlined />, label: 'RISK高频' , children: [
+              { key: '/risk-050009', icon: <PlayCircleOutlined />, label: 'RISK050009' },
+          ] },
+
     ],
   },
   {
@@ -170,7 +181,7 @@ export function AppShell() {
   const antdMenuItems = toAntdMenuItems(menuItems);
 
   return (
-    <ConfigProvider
+    <ConfigProvider componentSize="large"
       locale={zhCN}
       theme={{
         algorithm: themeMode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
@@ -195,7 +206,7 @@ export function AppShell() {
           <Menu
             theme="dark"
             mode="inline"
-            defaultOpenKeys={['group-one', 'group-two', 'group-three']}
+            defaultOpenKeys={['group-one', 'group-two',]}
             selectedKeys={selectedKeys}
             items={antdMenuItems}
             onClick={({ key }) => openMenu(String(key))}

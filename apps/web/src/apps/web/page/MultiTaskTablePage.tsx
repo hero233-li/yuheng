@@ -17,8 +17,8 @@ import {
   type MultiTaskSubTaskDto,
   type MultiTaskSubTaskPayload,
   type MultiTaskTablePayload,
-} from '../../api/app';
-import { useAppPreferences } from '../../stores/appPreferences';
+} from '../../../api/app';
+import { useAppPreferences } from '../../../stores/appPreferences';
 
 const { TextArea } = Input;
 const MAIN_TASK_STATUS_OPTIONS: MultiTaskRowDto['status'][] = ['未提交', '执行中', '已完成', '存档'];
