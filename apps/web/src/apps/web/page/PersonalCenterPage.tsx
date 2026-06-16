@@ -91,20 +91,7 @@ export function PersonalCenterPage() {
               {!activeDailyStats.length && <Typography.Text type="secondary">暂无日志趋势数据。</Typography.Text>}
             </div>
           </ProCard>
-          <ProCard title="接口调用分布">
-            <Space direction="vertical" size={14} style={{ width: '100%' }}>
-              {(data?.menu_stats || []).map((item) => (
-                <div key={item.name}>
-                  <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                    <Typography.Text ellipsis style={{ maxWidth: 360 }}>{item.name}</Typography.Text>
-                    <Typography.Text type="secondary">{item.count} 次</Typography.Text>
-                  </Space>
-                  <Progress percent={item.rate} size="small" showInfo />
-                </div>
-              ))}
-              {!data?.menu_stats.length && <Typography.Text type="secondary">暂无接口日志。</Typography.Text>}
-            </Space>
-          </ProCard>
+
         </ProCard>
 
         <ProCard title="接口日志列表">
