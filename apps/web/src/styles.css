@@ -407,3 +407,11 @@ body {
   font-size: 12px;
   line-height: 1.6;
 }
+
+.log-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}

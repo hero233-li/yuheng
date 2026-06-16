@@ -1,16 +1,22 @@
 import { ApiOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Descriptions, Drawer, Progress, Radio, Space, Statistic, Tag, Typography } from 'antd';
+import { Button, DatePicker, Descriptions, Drawer, Input, Progress, Radio, Space, Statistic, Tag, Typography } from 'antd';
+import dayjs, { type Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
 import { getInvocationRecord, getInvocationSummary, type InvocationRecordDto } from '../../api/app';
 
 type PeriodKey = 'day' | 'week' | 'month' | 'year';
 type DetailKey = 'request_params' | 'response_params' | 'response_log';
+type DateRangeValue = [Dayjs | null, Dayjs | null] | null;
+
+const { RangePicker } = DatePicker;
 
 export function PersonalCenterPage() {
   const [selectedRecord, setSelectedRecord] = useState<InvocationRecordDto | null>(null);
   const [activePeriod, setActivePeriod] = useState<PeriodKey>('week');
+  const [keyword, setKeyword] = useState('');
+  const [dateRange, setDateRange] = useState<DateRangeValue>(null);
   const summaryQuery = useQuery({
     queryKey: ['invocation-summary'],
     queryFn: getInvocationSummary,
@@ -24,12 +30,16 @@ export function PersonalCenterPage() {
   const data = summaryQuery.data;
   const detailRecord = detailQuery.data || selectedRecord;
   const logs = data?.records || [];
-  const failedCount = logs.filter((record) => !record.success).length;
+  const filteredLogs = useMemo(
+    () => logs.filter((record) => matchesDateRange(record, dateRange) && matchesKeyword(record, keyword)),
+    [dateRange, keyword, logs],
+  );
+  const failedCount = filteredLogs.filter((record) => !record.success).length;
   const activeDailyStats = data?.period_daily_stats?.[activePeriod] || data?.daily_stats || [];
   const maxDailyCount = Math.max(...(activeDailyStats.map((item) => item.count) || [1]), 1);
   const pathFilters = useMemo(
-    () => Array.from(new Set(logs.map((item) => item.path).filter(Boolean))).map((path) => ({ text: path, value: path })),
-    [logs],
+    () => Array.from(new Set(filteredLogs.map((item) => item.path).filter(Boolean))).map((path) => ({ text: path, value: path })),
+    [filteredLogs],
   );
 
   return (
@@ -37,10 +47,10 @@ export function PersonalCenterPage() {
       <div className="page-stack">
         <Space size={16} wrap>
           <ProCard className="analysis-stat-card">
-            <Statistic title="接口日志" value={data?.summary.api_total || 0} prefix={<ApiOutlined />} suffix="条" />
+            <Statistic title="接口日志" value={filteredLogs.length} prefix={<ApiOutlined />} suffix="条" />
           </ProCard>
           <ProCard className="analysis-stat-card">
-            <Statistic title="成功调用" value={(data?.summary.api_total || 0) - failedCount} prefix={<CheckCircleOutlined />} suffix="条" />
+            <Statistic title="成功调用" value={filteredLogs.length - failedCount} prefix={<CheckCircleOutlined />} suffix="条" />
           </ProCard>
           <ProCard className="analysis-stat-card">
             <Statistic title="失败调用" value={failedCount} prefix={<CloseCircleOutlined />} suffix="条" />
@@ -97,12 +107,40 @@ export function PersonalCenterPage() {
         </ProCard>
 
         <ProCard title="接口日志列表">
+          <div className="log-filter-bar">
+            <RangePicker
+              showTime
+              value={dateRange}
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder={['开始时间', '结束时间']}
+              onChange={(value) => setDateRange(value)}
+            />
+            <Input.Search
+              allowClear
+              value={keyword}
+              placeholder="搜索接口名、路径、请求报文、响应报文、响应日志"
+              onChange={(event) => setKeyword(event.target.value)}
+              onSearch={setKeyword}
+              style={{ maxWidth: 520 }}
+            />
+            <Button
+              onClick={() => {
+                setDateRange(null);
+                setKeyword('');
+              }}
+            >
+              重置
+            </Button>
+            <Typography.Text type="secondary">
+              共 {logs.length} 条，当前筛选 {filteredLogs.length} 条
+            </Typography.Text>
+          </div>
           <ProTable<InvocationRecordDto>
             rowKey="id"
             search={false}
             options={false}
             loading={summaryQuery.isLoading}
-            dataSource={logs}
+            dataSource={filteredLogs}
             pagination={{ pageSize: 12, showSizeChanger: true }}
             columns={[
               {
@@ -210,6 +248,48 @@ function LogBlock({ title, content, loading, dark = false }: { title: string; co
       <pre className={dark ? 'log-box' : 'api-log-code'}>{content}</pre>
     </ProCard>
   );
+}
+
+function matchesDateRange(record: InvocationRecordDto, dateRange: DateRangeValue) {
+  if (!dateRange?.[0] && !dateRange?.[1]) {
+    return true;
+  }
+  const recordTime = dayjs(record.created_at, 'YYYY-MM-DD HH:mm:ss');
+  if (!recordTime.isValid()) {
+    return true;
+  }
+  const [start, end] = dateRange;
+  if (start && recordTime.isBefore(start)) {
+    return false;
+  }
+  if (end && recordTime.isAfter(end)) {
+    return false;
+  }
+  return true;
+}
+
+function matchesKeyword(record: InvocationRecordDto, keyword: string) {
+  const normalizedKeyword = keyword.trim().toLowerCase();
+  if (!normalizedKeyword) {
+    return true;
+  }
+  return buildSearchText(record).toLowerCase().includes(normalizedKeyword);
+}
+
+function buildSearchText(record: InvocationRecordDto) {
+  return [
+    record.name,
+    record.method,
+    record.path,
+    record.status_code,
+    record.duration_ms,
+    record.created_at,
+    formatDetailBlock(record.detail, 'request_params'),
+    formatDetailBlock(record.detail, 'response_params'),
+    formatDetailBlock(record.detail, 'response_log'),
+  ]
+    .filter((item) => item !== undefined && item !== null)
+    .join('\n');
 }
 
 function formatDetailBlock(detail: string, key: DetailKey) {
