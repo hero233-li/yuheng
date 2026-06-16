@@ -19,6 +19,7 @@ import { recordInvocation } from '../api/app';
 
 const { Header, Sider, Content } = Layout;
 const PERSONAL_CENTER_ACCESS_CODE = 'yu123';
+
 const protectedMenuPaths = new Set(['/multi-task-table', '/personal-center', '/system-settings']);
 
 interface AppMenuItem {
@@ -72,6 +73,7 @@ const menuItems: AppMenuItem[] = [
 
 export function AppShell() {
   const location = useLocation();
+  const currentFullPath = `${location.pathname}${location.search}`;
   const navigate = useNavigate();
   const { message } = App.useApp();
   const title = '玉衡';
@@ -103,24 +105,36 @@ export function AppShell() {
   const selectedKeys = currentMenu ? [currentMenu.key] : [location.pathname];
 
   useEffect(() => {
-    if (!currentMenu) {
-      return;
+  if (!currentMenu) {
+    return;
+  }
+
+  const activeTab = tabs.find((item) => item.key === activeTabKey);
+  if (activeTab?.path === currentFullPath) {
+    return;
+  }
+
+  setTabs((current) => {
+    const existing = current.find((item) => item.path === currentFullPath);
+
+    if (existing) {
+      setActiveTabKey(existing.key);
+      return current;
     }
-    const activeTab = tabs.find((item) => item.key === activeTabKey);
-    if (activeTab?.path === currentMenu.key) {
-      return;
-    }
-    setTabs((current) => {
-      const existing = current.find((item) => item.path === currentMenu.key);
-      if (existing) {
-        setActiveTabKey(existing.key);
-        return current;
-      }
-      const nextTab = { key: currentMenu.key, path: currentMenu.key, label: currentMenu.label };
-      setActiveTabKey(nextTab.key);
-      return [...current, nextTab];
-    });
-  }, [activeTabKey, currentMenu, tabs]);
+
+    const searchParams = new URLSearchParams(location.search);
+    const tabKeyFromUrl = searchParams.get('tabKey');
+
+    const nextTab = {
+      key: tabKeyFromUrl || currentMenu.key,
+      path: currentFullPath,
+      label: currentMenu.label,
+    };
+
+    setActiveTabKey(nextTab.key);
+    return [...current, nextTab];
+  });
+}, [activeTabKey, currentFullPath, currentMenu, location.search, tabs]);
 
   useEffect(() => {
     if (!currentMenu) {
@@ -147,22 +161,44 @@ export function AppShell() {
     }
     openAllowedMenu(path, target);
   }
-
   function openAllowedMenu(path: string, target: AppMenuItem) {
-    if ((menuTabModes[path] || 'single') === 'multi') {
-      const samePathCount = tabs.filter((item) => item.path === path).length;
-      const tabKey = `${path}::${Date.now()}`;
-      const nextTab = {
-        key: tabKey,
-        path,
-        label: samePathCount === 0 ? target.label : `${target.label}-${samePathCount + 1}`,
-      };
-      setTabs((current) => [...current, nextTab]);
-      setActiveTabKey(tabKey);
-    }
-    navigate(path);
+  const mode = menuTabModes[path] || 'single';
+
+  if (mode === 'multi') {
+    const samePathCount = tabs.filter((item) => item.path.startsWith(path)).length;
+    const tabKey = `${path}::${Date.now()}::${Math.random().toString(36).slice(2)}`;
+    const pagePath = `${path}?tabKey=${encodeURIComponent(tabKey)}`;
+
+    const nextTab = {
+      key: tabKey,
+      path: pagePath,
+      label: samePathCount === 0 ? target.label : `${target.label}-${samePathCount + 1}`,
+    };
+
+    setTabs((current) => [...current, nextTab]);
+    setActiveTabKey(tabKey);
+    navigate(pagePath);
+    return;
   }
 
+  const existingTab = tabs.find((item) => item.key === path);
+
+  if (existingTab) {
+    setActiveTabKey(existingTab.key);
+    navigate(existingTab.path);
+    return;
+  }
+
+  const nextTab = {
+    key: path,
+    path,
+    label: target.label,
+  };
+
+  setTabs((current) => [...current, nextTab]);
+  setActiveTabKey(path);
+  navigate(path);
+}
   function verifyAccessCode() {
     if (accessCode !== PERSONAL_CENTER_ACCESS_CODE) {
       message.error('校验码不正确');
@@ -272,7 +308,7 @@ export function AppShell() {
               '--page-gap': `${pageGap}px`,
             } as React.CSSProperties}
           >
-            <Outlet />
+            <Outlet key={activeTabKey || currentFullPath} />
           </Content>
         </Layout>
       </Layout>

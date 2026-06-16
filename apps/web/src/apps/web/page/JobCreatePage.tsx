@@ -17,7 +17,8 @@ import {
   Typography,
 } from 'antd';
 import dayjs from 'dayjs';
-import { useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { createJob, getJob, getJobLogs, listJobs } from '../../../api/app';
 import type { Job, JobLog, JobStage, JobStatus } from '../../../types';
 import {
@@ -47,19 +48,81 @@ const stageColor: Record<JobStage, string> = {
 };
 
 export function JobCreatePage() {
+
+
   const [form] = Form.useForm();
   const { message } = App.useApp();
+
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const currentPageKey = searchParams.get('tabKey') || location.pathname;
+
+  const formCacheKey = `job-create-form:${currentPageKey}`;
+  const runningJobCacheKey = `job-create-running-job:${currentPageKey}`;
+  const [currentRunningJobId, setCurrentRunningJobId] = useState<Job['id'] | null>(() => {
+  return sessionStorage.getItem(runningJobCacheKey);
+});
+  useEffect(() => {
+  setCurrentRunningJobId(sessionStorage.getItem(runningJobCacheKey));
+}, [currentPageKey, runningJobCacheKey]);
+  const submittedJobsCacheKey = `job-create-submitted-jobs:${currentPageKey}`;
+
   const queryClient = useQueryClient();
+
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [submittedJobIds, setSubmittedJobIds] = useState<string[]>([]);
+
+  const [submittedJobIds, setSubmittedJobIds] = useState<string[]>(() => {
+    const cached = sessionStorage.getItem(submittedJobsCacheKey);
+
+    if (!cached) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(cached) as string[];
+    } catch {
+      sessionStorage.removeItem(submittedJobsCacheKey);
+      return [];
+    }
+  });
   const watchedValues = Form.useWatch([], form) || {};
+
+  console.log('JobCreatePage currentPageKey:', currentPageKey);
+
+
+
+
+  useEffect(() => {
+    const cached = sessionStorage.getItem(submittedJobsCacheKey);
+    if (!cached) {
+      setSubmittedJobIds([]);
+      return;
+    }
+    try {
+      setSubmittedJobIds(JSON.parse(cached) as string[]);
+    } catch {
+      sessionStorage.removeItem(submittedJobsCacheKey);
+      setSubmittedJobIds([]);
+    }
+  }, [currentPageKey, submittedJobsCacheKey]);
   const searchConfig = useMemo(() => buildSearchConfig(watchedValues), [watchedValues]);
 
-  const initialValues = useMemo(
-    () => getInitialSearchValues(),
-    [],
-  );
+  const initialValues = useMemo(() => getInitialSearchValues(), []);
+  useLayoutEffect(() => {
+    const cached = sessionStorage.getItem(formCacheKey);
 
+    if (cached) {
+      try {
+        form.setFieldsValue(JSON.parse(cached));
+        return;
+      } catch {
+        sessionStorage.removeItem(formCacheKey);
+      }
+    }
+
+    form.setFieldsValue(initialValues);
+  }, [currentPageKey, form, formCacheKey, initialValues]);
   const jobsQuery = useQuery({
     queryKey: ['jobs'],
     queryFn: listJobs,
@@ -74,6 +137,69 @@ export function JobCreatePage() {
     refetchInterval: selectedJobId ? 1000 : false,
   });
 
+  const mutation = useMutation({
+    mutationFn: createJob,
+onSuccess: async (job) => {
+  setSubmittedJobIds((current) => {
+    const next = [job.id, ...current];
+    sessionStorage.setItem(submittedJobsCacheKey, JSON.stringify(next));
+    return next;
+  });
+
+  setCurrentRunningJobId(job.id);
+  sessionStorage.setItem(runningJobCacheKey, job.id);
+
+  setSelectedJobId(job.id);
+
+  await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
+  message.success('执行任务已提交');
+},
+onError: (error: Error) => {
+  setCurrentRunningJobId(null);
+  sessionStorage.removeItem(runningJobCacheKey);
+
+  message.error(error.message);
+},
+  });
+
+  const currentRunningJob = useMemo((): Job | undefined => {
+    if (!currentRunningJobId) {
+      return undefined;
+    }
+
+    return jobsQuery.data?.find((job) => job.id === currentRunningJobId);
+  }, [jobsQuery.data, currentRunningJobId]);
+
+  const isCurrentPageExecuting =
+      mutation.isPending ||
+      Boolean(
+          currentRunningJobId &&
+          (!currentRunningJob || ['pending', 'running'].includes(currentRunningJob.status))
+      );
+
+useEffect(() => {
+  if (!currentRunningJobId || !currentRunningJob) {
+    return;
+  }
+
+  if (!['pending', 'running'].includes(currentRunningJob.status)) {
+    setCurrentRunningJobId(null);
+    sessionStorage.removeItem(runningJobCacheKey);
+  }
+}, [currentRunningJobId, currentRunningJob, runningJobCacheKey]);
+
+  function handleValuesChange(changedValues: Record<string, unknown>) {
+    normalizeCascadeValues(changedValues);
+
+    setTimeout(() => {
+      sessionStorage.setItem(
+          formCacheKey,
+          JSON.stringify(form.getFieldsValue(true)),
+      );
+    }, 0);
+  }
+
   const logsQuery = useQuery<JobLog[]>({
     queryKey: ['job-logs', selectedJobId],
     queryFn: () => getJobLogs(selectedJobId!),
@@ -81,15 +207,6 @@ export function JobCreatePage() {
     refetchInterval: selectedJobId ? 1000 : false,
   });
 
-  const mutation = useMutation({
-    mutationFn: createJob,
-    onSuccess: async (job) => {
-      setSubmittedJobIds((current) => [job.id, ...current]);
-      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      setSelectedJobId(job.id);
-      message.success('执行任务已提交');
-    },
-  });
 
   const selectedJob = selectedJobQuery.data;
 
@@ -128,17 +245,17 @@ export function JobCreatePage() {
     const nextValues: Record<string, unknown> = {};
     for (const fieldName of resetFields) {
       const fieldConfig = buildSearchConfig({ ...currentValues, ...nextValues }).find(
-        (field) => field.name === fieldName,
+          (field) => field.name === fieldName,
       );
       if (!fieldConfig) {
         continue;
       }
       const options = getFieldOptionsWithValues(fieldConfig, { ...currentValues, ...nextValues });
       nextValues[fieldName] = fieldConfig.multiple
-        ? options[0]?.value
-          ? [options[0].value]
-          : []
-        : options[0]?.value;
+          ? options[0]?.value
+              ? [options[0].value]
+              : []
+          : options[0]?.value;
     }
     form.setFieldsValue(nextValues);
   }
@@ -151,33 +268,33 @@ export function JobCreatePage() {
 
     if (field.type === 'select') {
       return (
-        <Select
-          {...commonProps}
-          mode={field.multiple ? 'multiple' : undefined}
-          options={getFieldOptions(field)}
-          allowClear
-          showSearch={field.searchable}
-          optionFilterProp="label"
-          filterOption={(input, option) => {
-            const keyword = input.trim().toLowerCase();
-            const label = String(option?.label ?? '').toLowerCase();
-            const value = String(option?.value ?? '').toLowerCase();
-            return label.includes(keyword) || value.includes(keyword);
-          }}
-        />
+          <Select
+              {...commonProps}
+              mode={field.multiple ? 'multiple' : undefined}
+              options={getFieldOptions(field)}
+              allowClear
+              showSearch={field.searchable}
+              optionFilterProp="label"
+              filterOption={(input, option) => {
+                const keyword = input.trim().toLowerCase();
+                const label = String(option?.label ?? '').toLowerCase();
+                const value = String(option?.value ?? '').toLowerCase();
+                return label.includes(keyword) || value.includes(keyword);
+              }}
+          />
       );
     }
     if (field.type === 'switch') {
       const hasSwitchLabel = Boolean(field.checkedLabel || field.uncheckedLabel);
       return (
-        <Switch
-          className={hasSwitchLabel ? 'form-switch-with-label' : undefined}
-          disabled={!field.editable}
-          size="default"
-          checkedChildren={field.checkedLabel}
-          unCheckedChildren={field.uncheckedLabel}
-          style={field.switchWidth ? { minWidth: field.switchWidth, width: field.switchWidth } : undefined}
-        />
+          <Switch
+              className={hasSwitchLabel ? 'form-switch-with-label' : undefined}
+              disabled={!field.editable}
+              size="default"
+              checkedChildren={field.checkedLabel}
+              unCheckedChildren={field.uncheckedLabel}
+              style={field.switchWidth ? { minWidth: field.switchWidth, width: field.switchWidth } : undefined}
+          />
       );
     }
     return <Input {...commonProps} />;
@@ -194,11 +311,11 @@ export function JobCreatePage() {
 
   function buildSubmitPayload(values: Record<string, unknown>) {
     const submittedFields = searchConfig
-      .filter((field) => field.submit && isFieldVisible(field))
-      .reduce<Record<string, unknown>>((payload, field) => {
-        payload[field.name] = values[field.name];
-        return payload;
-      }, {});
+        .filter((field) => field.submit && isFieldVisible(field))
+        .reduce<Record<string, unknown>>((payload, field) => {
+          payload[field.name] = values[field.name];
+          return payload;
+        }, {});
 
     return {
       name: String(values.name || '产品申请'),
@@ -209,151 +326,164 @@ export function JobCreatePage() {
   }
 
   return (
-    <PageContainer title={false}>
-      <div className="page-stack">
-        <ProCard >
-          <Form
-            form={form}
-            layout="vertical"
-            initialValues={initialValues}
-            onValuesChange={normalizeCascadeValues}
-            onFinish={(values) => mutation.mutate(buildSubmitPayload(values))}
-          >
-            <Row gutter={16}>
-              {searchConfig.filter(isFieldVisible).map((field) => (
-                <Col span={field.span} key={field.name}>
-                  <Form.Item
-                    name={field.name}
-                    label={field.label}
-                    rules={field.required ? [{ required: true, message: `请填写${field.label}` }] : undefined}
-                    valuePropName={field.type === 'switch' ? 'checked' : 'value'}
-                    style={{ marginBottom: 4 }}
-                  >
-                    {renderField(field)}
-                  </Form.Item>
-                </Col>
-              ))}
-            </Row>
-            <Space className="form-action-center">
-              <Button type="primary" htmlType="submit" loading={mutation.isPending}>
-                执行
-              </Button>
-              <Button onClick={() => form.resetFields()}>重置</Button>
-            </Space>
-          </Form>
-        </ProCard>
+      <PageContainer title={false}>
+        <div className="page-stack">
+          <ProCard >
+            <Form
+                key={currentPageKey}
+                form={form}
+                layout="vertical"
+                initialValues={initialValues}
+                onValuesChange={handleValuesChange}
+                onFinish={(values) => mutation.mutate(buildSubmitPayload(values))}
+            >
+              <Row gutter={16}>
+                {searchConfig.filter(isFieldVisible).map((field) => (
+                    <Col span={field.span} key={field.name}>
+                      <Form.Item
+                          name={field.name}
+                          label={field.label}
+                          rules={field.required ? [{ required: true, message: `请填写${field.label}` }] : undefined}
+                          valuePropName={field.type === 'switch' ? 'checked' : 'value'}
+                          style={{ marginBottom: 4 }}
+                      >
+                        {renderField(field)}
+                      </Form.Item>
+                    </Col>
+                ))}
+              </Row>
+              <Space className="form-action-center">
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={isCurrentPageExecuting}
+                    disabled={isCurrentPageExecuting}
+                >
+                  {isCurrentPageExecuting ? '执行中' : '执行'}
+                </Button>
+                <Button
+                    onClick={() => {
+                      form.resetFields();
+                      sessionStorage.removeItem(formCacheKey);
+                    }}
+                >
+                  重置
+                </Button>
+              </Space>
+            </Form>
+          </ProCard>
 
-        <ProCard title="执行结果">
-          <ProTable<Job>
-            rowKey="id"
-            search={false}
-            options={false}
-            loading={jobsQuery.isLoading}
-            dataSource={resultJobs}
-            pagination={{ pageSize: 6 }}
-            columns={[
-              { title: '申请项目', dataIndex: 'name', width: 180 },
-              {
-                title: '状态',
-                dataIndex: 'stage_label',
-                width: 140,
-                render: (_, record) => (
-                  <Tag color={stageColor[record.stage]}>{record.stage_label}</Tag>
-                ),
-              },
-              {
-                title: '进度',
-                dataIndex: 'progress',
-                width: 220,
-                render: (_, record) => (
-                  <Progress
-                    percent={record.progress}
-                    size="small"
-                    status={record.status === 'failed' ? 'exception' : record.status === 'success' ? 'success' : 'active'}
-                  />
-                ),
-              },
-              {
-                title: '创建时间',
-                dataIndex: 'created_at',
-                width: 180,
-                render: (_, record) => dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss'),
-              },
-              {
-                title: '操作',
-                width: 100,
-                render: (_, record) => (
-                  <Button size="small" onClick={() => setSelectedJobId(record.id)}>
-                    详情
-                  </Button>
-                ),
-              },
-            ]}
-          />
-        </ProCard>
-      </div>
+          <ProCard title="执行结果">
+            <ProTable<Job>
+                rowKey="id"
+                search={false}
+                options={false}
+                loading={jobsQuery.isLoading}
+                dataSource={resultJobs}
+                pagination={{ pageSize: 6 }}
+                columns={[
+                  { title: '申请项目', dataIndex: 'name', width: 180 },
+                  {
+                    title: '状态',
+                    dataIndex: 'stage_label',
+                    width: 140,
+                    render: (_, record) => (
+                        <Tag color={stageColor[record.stage]}>{record.stage_label}</Tag>
+                    ),
+                  },
+                  {
+                    title: '进度',
+                    dataIndex: 'progress',
+                    width: 220,
+                    render: (_, record) => (
+                        <Progress
+                            percent={record.progress}
+                            size="small"
+                            status={record.status === 'failed' ? 'exception' : record.status === 'success' ? 'success' : 'active'}
+                        />
+                    ),
+                  },
+                  {
+                    title: '创建时间',
+                    dataIndex: 'created_at',
+                    width: 180,
+                    render: (_, record) => dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss'),
+                  },
+                  {
+                    title: '操作',
+                    width: 100,
+                    render: (_, record) => (
+                        <Button size="small" onClick={() => setSelectedJobId(record.id)}>
+                          详情
+                        </Button>
+                    ),
+                  },
+                ]}
+            />
+          </ProCard>
+        </div>
 
-      <Drawer
-        title="执行详情"
-        width={780}
-        open={Boolean(selectedJobId)}
-        onClose={() => setSelectedJobId(null)}
-      >
-        {selectedJob && (
-          <div className="page-stack">
-            <div className="job-detail-summary">
-              <div className="job-detail-item">
-                <Typography.Text type="secondary">申请项目</Typography.Text>
-                <Typography.Text strong>{selectedJob.name}</Typography.Text>
-              </div>
-              <div className="job-detail-item">
-                <Typography.Text type="secondary">执行状态</Typography.Text>
-                <Space wrap>
-                  <Tag color={statusColor[selectedJob.status]}>{selectedJob.status}</Tag>
-                  <Tag color={stageColor[selectedJob.stage]}>{selectedJob.stage_label}</Tag>
-                </Space>
-              </div>
-              <div className="job-detail-item job-detail-item-full">
-                <Typography.Text type="secondary">提交参数</Typography.Text>
-                <pre className="job-detail-code">
+        <Drawer
+            title="执行详情"
+            width={780}
+            open={Boolean(selectedJobId)}
+            onClose={() => setSelectedJobId(null)}
+        >
+          {selectedJob && (
+              <div className="page-stack">
+                <div className="job-detail-summary">
+                  <div className="job-detail-item">
+                    <Typography.Text type="secondary">申请项目</Typography.Text>
+                    <Typography.Text strong>{selectedJob.name}</Typography.Text>
+                  </div>
+                  <div className="job-detail-item">
+                    <Typography.Text type="secondary">执行状态</Typography.Text>
+                    <Space wrap>
+                      <Tag color={statusColor[selectedJob.status]}>{selectedJob.status}</Tag>
+                      <Tag color={stageColor[selectedJob.stage]}>{selectedJob.stage_label}</Tag>
+                    </Space>
+                  </div>
+                  <div className="job-detail-item job-detail-item-full">
+                    <Typography.Text type="secondary">提交参数</Typography.Text>
+                    <pre className="job-detail-code">
                   {JSON.stringify(selectedJob.payload.search_form || selectedJob.payload, null, 2)}
                 </pre>
-              </div>
-            </div>
-
-            <ProCard title="执行进度">
-              <Progress
-                percent={selectedJob.progress}
-                status={selectedJob.status === 'failed' ? 'exception' : selectedJob.status === 'success' ? 'success' : 'active'}
-              />
-              <div className="job-steps-wrap">
-                <Steps
-                  current={selectedJob.stage_index}
-                  status={selectedJob.status === 'failed' ? 'error' : selectedJob.status === 'success' ? 'finish' : 'process'}
-                  items={selectedJob.stage_steps.map((step) => ({ title: step.title }))}
-                />
-              </div>
-            </ProCard>
-
-            <ProCard title="执行记录" loading={logsQuery.isLoading}>
-              <div className="log-box">
-                {(logsQuery.data || []).map((log) => (
-                  <div key={log.id}>
-                    [{dayjs(log.created_at).format('HH:mm:ss')}] [{log.level}] {log.message}
                   </div>
-                ))}
-                {!logsQuery.data?.length && <div>暂无执行记录</div>}
-              </div>
-            </ProCard>
+                </div>
 
-            <ProCard title="Mock 返回数据">
-              <Typography.Text code>
-                {selectedJob.result ? JSON.stringify(selectedJob.result, null, 2) : '暂无结果'}
-              </Typography.Text>
-            </ProCard>
-          </div>
-        )}
-      </Drawer>
-    </PageContainer>
+                <ProCard title="执行进度">
+                  <Progress
+                      percent={selectedJob.progress}
+                      status={selectedJob.status === 'failed' ? 'exception' : selectedJob.status === 'success' ? 'success' : 'active'}
+                  />
+                  <div className="job-steps-wrap">
+                    <Steps
+                        current={selectedJob.stage_index}
+                        status={selectedJob.status === 'failed' ? 'error' : selectedJob.status === 'success' ? 'finish' : 'process'}
+                        items={selectedJob.stage_steps.map((step) => ({ title: step.title }))}
+                    />
+                  </div>
+                </ProCard>
+
+                <ProCard title="执行记录" loading={logsQuery.isLoading}>
+                  <div className="log-box">
+                    {(logsQuery.data || []).map((log) => (
+                        <div key={log.id}>
+                          [{dayjs(log.created_at).format('HH:mm:ss')}] [{log.level}] {log.message}
+                        </div>
+                    ))}
+                    {!logsQuery.data?.length && <div>暂无执行记录</div>}
+                  </div>
+                </ProCard>
+
+                <ProCard title="Mock 返回数据">
+                  <Typography.Text code>
+                    {selectedJob.result ? JSON.stringify(selectedJob.result, null, 2) : '暂无结果'}
+                  </Typography.Text>
+                </ProCard>
+              </div>
+          )}
+        </Drawer>
+      </PageContainer>
   );
 }
