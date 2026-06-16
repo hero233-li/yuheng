@@ -33,6 +33,8 @@ export async function cancelJob(jobId: string) {
 
 export interface MultiTaskRowDto {
   id: string;
+  taskName: string;
+  taskCategory: string;
   product: string;
   owner: string;
   environment: string;
@@ -43,7 +45,9 @@ export interface MultiTaskRowDto {
   patchCount: number;
   approveCount: number;
   priority: '高' | '中' | '低';
-  status: '未提交' | '执行中' | '已完成';
+  status: '未提交' | '执行中' | '已完成' | '存档';
+  dueDate: string;
+  completion: number;
   remark: string;
   subTaskCount: number;
 }
@@ -51,10 +55,7 @@ export interface MultiTaskRowDto {
 export interface MultiTaskSubTaskDto {
   id: string;
   title: string;
-  assignee: string;
   status: '未开始' | '进行中' | '已完成';
-  workload: number;
-  dueDate: string;
   remark: string;
 }
 
@@ -216,6 +217,7 @@ export interface InvocationRecordDto {
   success: boolean;
   duration_ms: number;
   detail: string;
+  has_detail?: boolean;
   created_at: string;
 }
 
@@ -243,6 +245,10 @@ export interface InvocationSummaryPayload {
     date: string;
     count: number;
   }>;
+  period_daily_stats: Record<'day' | 'week' | 'month' | 'year', Array<{
+    date: string;
+    count: number;
+  }>>;
   records: InvocationRecordDto[];
 }
 
@@ -261,5 +267,10 @@ export async function recordInvocation(payload: {
 
 export async function getInvocationSummary() {
   const { data } = await apiClient.get<InvocationSummaryPayload>('/invocations/summary/');
+  return data;
+}
+
+export async function getInvocationRecord(recordId: number) {
+  const { data } = await apiClient.get<InvocationRecordDto>(`/invocations/${recordId}/`);
   return data;
 }

@@ -104,7 +104,7 @@ export function GroupedCardSearchPage() {
   }
 
   return (
-    <PageContainer title="卡片任务" subTitle="任务卡片按 A 组、B 组页签切换展示">
+    <PageContainer title={false}>
       <div className="page-stack">
         <ProCard>
           <Form layout="inline" onFinish={runSearch}>

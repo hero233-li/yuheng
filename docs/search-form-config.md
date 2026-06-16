@@ -18,7 +18,6 @@ apps/web/src/apps/web/JobCreatePage.tsx
 
 ```ts
 const environments = [...]
-const serviceTypeOptions = [...]
 const productCatalog = [...]
 const commonFields = [...]
 export const cascadeResetMap = {...}
@@ -28,7 +27,6 @@ export const searchPageBehavior = {...}
 | 对象 | 作用 |
 | --- | --- |
 | `environments` | 环境列表 |
-| `serviceTypeOptions` | 办理类型列表，固定显示在环境后、产品前 |
 | `productCatalog` | 以产品为单位维护所在地、辖行、网点、字段规则 |
 | `commonFields` | 公共字段，如姓名、证件号、卡号、手机号、公司名、信用代码和上送开关 |
 | `cascadeResetMap` | 上级变化时自动重置哪些下级字段 |
@@ -40,18 +38,18 @@ export const searchPageBehavior = {...}
 
 ```ts
 {
-  name: 'serviceType',
-  label: '办理类型',
+  name: 'product',
+  label: '产品',
   type: 'select',
   span: 4,
   editable: true,
   visible: true,
   submit: true,
   required: true,
-  defaultValue: 'new',
+  defaultValue: 'product_a',
   options: [
-    { label: '新办', value: 'new' },
-    { label: '变更', value: 'change' },
+    { label: '产品A', value: 'product_a' },
+    { label: '产品B', value: 'product_b' },
   ],
 }
 ```
@@ -183,7 +181,6 @@ uncheckedLabel 是关闭时显示的文案
     姓名必填
     证件必填
     手机必填
-    固定字段：办理类型 select，显示在环境后、产品前
 
   产品B
     所在地2
@@ -355,7 +352,6 @@ submit = true
   "name": "产品申请",
   "search_form": {
     "environment": "env_1",
-    "serviceType": "new",
     "product": "product_a",
     "location": "location_1",
     "jurisdiction": "jurisdiction_1",
@@ -369,8 +365,7 @@ submit = true
     "whitelist": true,
     "redShield": false,
     "creditReport": false,
-    "legalPerson": false,
-    "serviceType": "new"
+    "legalPerson": false
   },
   "biz_payload": "{...}"
 }

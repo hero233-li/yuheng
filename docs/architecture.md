@@ -10,7 +10,7 @@
   -> /api 代理
   -> Django API
   -> SQLite
-  -> 本地 worker
+  -> worker
 ```
 
 运行时一共有三个进程：

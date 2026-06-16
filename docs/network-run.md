@@ -7,8 +7,8 @@
 ```text
 React/Vite 前端：5174
 Django API 后端：8766
-本地 worker：独立进程
-SQLite：本机数据文件
+worker：独立进程
+数据库：持久化数据文件
 ```
 
 启动服务的电脑负责运行前端、后端和 worker。其他内网电脑通过浏览器访问前端地址。
@@ -65,12 +65,12 @@ npm run dev
 | 子进程 | 实际命令 | 说明 |
 | --- | --- | --- |
 | backend | `npm run backend:web` | Django API |
-| worker | `npm run backend:worker` | 本地任务执行 |
+| worker | `npm run backend:worker` | 任务执行 |
 | web | `npm run dev:web` | React/Vite 前端 |
 
 ## 访问地址
 
-本机访问：
+浏览器访问：
 
 ```text
 http://127.0.0.1:5174

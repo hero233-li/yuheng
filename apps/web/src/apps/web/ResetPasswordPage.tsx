@@ -50,7 +50,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <PageContainer title="重置密码" subTitle="选择环境并输入用户名，执行后展示后端返回进度">
+    <PageContainer title={false}>
       <div className="page-stack">
         <ProCard title="执行条件">
           <Form

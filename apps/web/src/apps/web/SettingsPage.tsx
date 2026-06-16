@@ -1,5 +1,5 @@
 import { PageContainer, ProCard } from '@ant-design/pro-components';
-import { Button, ColorPicker, Descriptions, Radio, Space, Tabs, Tag, Typography } from 'antd';
+import { Button, ColorPicker, Descriptions, Radio, Space, Tabs, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useAppPreferences } from '../../stores/appPreferences';
 
@@ -9,7 +9,7 @@ const menuSettings = [
   { path: '/reset-password', label: '重置密码' },
   { path: '/grouped-card-search', label: '卡片任务' },
   { path: '/multi-task-table', label: '多维任务表格' },
-  { path: '/personal-center', label: '历史调用记录' },
+  { path: '/personal-center', label: '日志中心' },
   { path: '/system-settings', label: '系统设置' },
 ];
 
@@ -40,10 +40,11 @@ export function SettingsPage() {
     setSiderWidth,
     setTableSize,
     setCardShadow,
+    setMenuTabMode,
   } = useAppPreferences();
 
   return (
-    <PageContainer title="系统设置">
+    <PageContainer title={false}>
       <Tabs
         items={[
           {
@@ -165,15 +166,19 @@ export function SettingsPage() {
             children: (
               <ProCard title="菜单管理">
                 <Typography.Paragraph type="secondary">
-                  当前页面只展示菜单页签模式，具体是否可多开请在 React 配置中维护。
+                  控制每个菜单点击时复用当前页签，还是每次打开一个新的页签。
                 </Typography.Paragraph>
                 <Descriptions column={1} bordered size="small">
                   {menuSettings.map((item) => (
                     <Descriptions.Item label={item.label} key={item.path}>
-                      <Space>
-                        <Tag color={menuTabModes[item.path] === 'multi' ? 'purple' : 'blue'}>
-                          {menuTabModes[item.path] === 'multi' ? '允许多开' : '复用页签'}
-                        </Tag>
+                      <Space size={12} wrap>
+                        <Radio.Group
+                          value={menuTabModes[item.path] || 'single'}
+                          onChange={(event) => setMenuTabMode(item.path, event.target.value)}
+                        >
+                          <Radio.Button value="single">复用页签</Radio.Button>
+                          <Radio.Button value="multi">允许多开</Radio.Button>
+                        </Radio.Group>
                         <Typography.Text type="secondary">{item.path}</Typography.Text>
                       </Space>
                     </Descriptions.Item>

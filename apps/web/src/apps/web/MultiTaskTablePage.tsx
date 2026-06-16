@@ -1,7 +1,8 @@
-import { PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Button, Descriptions, Drawer, Input, InputNumber, Popconfirm, Select, Space, Statistic, Tag } from 'antd';
+import { App, Button, DatePicker, Descriptions, Drawer, Input, InputNumber, Popconfirm, Select, Space, Tag, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import {
   addMultiTaskRow,
@@ -10,7 +11,6 @@ import {
   deleteMultiTaskSubTask,
   getMultiTaskTable,
   listMultiTaskSubTasks,
-  saveMultiTaskTable,
   updateMultiTaskRow,
   updateMultiTaskSubTask,
   type MultiTaskRowDto,
@@ -20,7 +20,8 @@ import {
 } from '../../api/app';
 import { useAppPreferences } from '../../stores/appPreferences';
 
-const emptySummary = { applyCount: 0, patchCount: 0, approveCount: 0, completed: 0 };
+const { TextArea } = Input;
+const MAIN_TASK_STATUS_OPTIONS: MultiTaskRowDto['status'][] = ['未提交', '执行中', '已完成', '存档'];
 
 export function MultiTaskTablePage() {
   const { message } = App.useApp();
@@ -29,6 +30,8 @@ export function MultiTaskTablePage() {
   const tableQuery = useQuery({ queryKey: ['mock-multi-task-table'], queryFn: getMultiTaskTable });
   const [draftRows, setDraftRows] = useState<MultiTaskRowDto[]>([]);
   const [activeMainTaskId, setActiveMainTaskId] = useState<string | null>(null);
+  const [remarkEditing, setRemarkEditing] = useState(false);
+  const [remarkDraft, setRemarkDraft] = useState('');
 
   const applyServerPayload = (data: MultiTaskTablePayload) => {
     queryClient.setQueryData(['mock-multi-task-table'], data);
@@ -53,14 +56,6 @@ export function MultiTaskTablePage() {
     onSuccess: (data) => {
       applyServerPayload(data);
       message.success('后端 mock 已删除该行');
-    },
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: saveMultiTaskTable,
-    onSuccess: (data) => {
-      applyServerPayload(data);
-      message.success('多维表格数据已保存到后端 mock');
     },
   });
 
@@ -102,9 +97,15 @@ export function MultiTaskTablePage() {
     }
   }, [tableQuery.data]);
 
+  useEffect(() => {
+    const activeRow = draftRows.find((row) => row.id === activeMainTaskId);
+    setRemarkDraft(activeRow?.remark || '');
+    setRemarkEditing(false);
+  }, [activeMainTaskId, draftRows]);
+
   const rows = draftRows;
   const activeMainTask = rows.find((row) => row.id === activeMainTaskId);
-  const summary = tableQuery.data?.summary || emptySummary;
+  const activeMainTaskArchived = activeMainTask?.status === '存档';
   const selectOptions = useMemo(
     () => ({
       product: tableQuery.data?.options.product || [],
@@ -113,7 +114,8 @@ export function MultiTaskTablePage() {
       region: tableQuery.data?.options.region || [],
       city: tableQuery.data?.options.city || [],
       priority: tableQuery.data?.options.priority || [],
-      status: tableQuery.data?.options.status || [],
+      status: mergeOptions(tableQuery.data?.options.status || [], MAIN_TASK_STATUS_OPTIONS),
+      taskCategory: tableQuery.data?.options.taskCategory || [],
     }),
     [tableQuery.data],
   );
@@ -142,38 +144,27 @@ export function MultiTaskTablePage() {
     }
   }
 
-  return (
-    <PageContainer title="多维任务表格" subTitle="可填写、可新增、可删除的多维任务矩阵">
-      <div className="page-stack">
-        <Space size={16} wrap>
-          <ProCard style={{ width: 180 }}>
-            <Statistic title="申请数量" value={summary.applyCount} />
-          </ProCard>
-          <ProCard style={{ width: 180 }}>
-            <Statistic title="补件数量" value={summary.patchCount} />
-          </ProCard>
-          <ProCard style={{ width: 180 }}>
-            <Statistic title="审批数量" value={summary.approveCount} />
-          </ProCard>
-          <ProCard style={{ width: 180 }}>
-            <Statistic title="完成行数" value={summary.completed} />
-          </ProCard>
-        </Space>
+  function saveMainTaskRemark() {
+    if (!activeMainTask) {
+      return;
+    }
+    if (remarkDraft === activeMainTask.remark) {
+      setRemarkEditing(false);
+      return;
+    }
+    updateAndPersist(activeMainTask.id, 'remark', remarkDraft);
+    setRemarkEditing(false);
+  }
 
+  return (
+    <PageContainer title={false}>
+      <div className="page-stack">
         <ProCard
-          title="任务矩阵"
+          title="主任务列表"
           extra={
             <Space>
               <Button icon={<PlusOutlined />} loading={addMutation.isPending} onClick={() => addMutation.mutate()}>
-                新增行
-              </Button>
-              <Button
-                type="primary"
-                icon={<SaveOutlined />}
-                loading={saveMutation.isPending}
-                onClick={() => saveMutation.mutate(draftRows)}
-              >
-                保存
+                新增主任务
               </Button>
             </Space>
           }
@@ -187,94 +178,92 @@ export function MultiTaskTablePage() {
             dataSource={rows}
             columns={[
               {
-                title: '主任务编号',
-                dataIndex: 'id',
+                title: '任务名称',
+                dataIndex: 'taskName',
                 fixed: 'left',
-                width: 120,
+                width: 320,
                 render: (_, row) => (
-                  <Button type="link" onClick={() => setActiveMainTaskId(row.id)}>
-                    {row.id}
-                  </Button>
+                  <Input
+                    value={row.taskName}
+                    placeholder="填写任务名称"
+                    disabled={isArchivedRow(row)}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(event) => patchDraftRow(row.id, 'taskName', event.target.value)}
+                    onBlur={() => persistDraftRow(row.id)}
+                  />
                 ),
               },
               {
-                title: '基础维度',
-                children: [
-                  { title: '产品', dataIndex: 'product', width: 150, render: (_, row) => renderSelect(row, 'product', selectOptions.product, updateAndPersist) },
-                  {
-                    title: '负责人',
-                    dataIndex: 'owner',
-                    width: 150,
-                    render: (_, row) => (
-                      <Input
-                        value={row.owner}
-                        placeholder="填写负责人"
-                        onChange={(event) => patchDraftRow(row.id, 'owner', event.target.value)}
-                        onBlur={() => persistDraftRow(row.id)}
-                      />
-                    ),
-                  },
-                  { title: '优先级', dataIndex: 'priority', width: 130, render: (_, row) => renderSelect(row, 'priority', selectOptions.priority, updateAndPersist) },
-                ],
+                title: '任务类别',
+                dataIndex: 'taskCategory',
+                width: 160,
+                filters: buildColumnFilters(selectOptions.taskCategory),
+                onFilter: (value, row) => row.taskCategory === value,
+                render: (_, row) => renderSelect(row, 'taskCategory', selectOptions.taskCategory, updateAndPersist, isArchivedRow(row)),
               },
               {
-                title: '区域维度',
-                children: [
-                  { title: '环境', dataIndex: 'environment', width: 140, render: (_, row) => renderSelect(row, 'environment', selectOptions.environment, updateAndPersist) },
-                  { title: '产地', dataIndex: 'origin', width: 140, render: (_, row) => renderSelect(row, 'origin', selectOptions.origin, updateAndPersist) },
-                  { title: '地区', dataIndex: 'region', width: 140, render: (_, row) => renderSelect(row, 'region', selectOptions.region, updateAndPersist) },
-                  { title: '城市', dataIndex: 'city', width: 140, render: (_, row) => renderSelect(row, 'city', selectOptions.city, updateAndPersist) },
-                ],
+                title: '任务状态',
+                dataIndex: 'status',
+                width: 160,
+                filters: buildColumnFilters(selectOptions.status),
+                onFilter: (value, row) => row.status === value,
+                render: (_, row) => renderStatus(row, selectOptions.status, updateAndPersist),
               },
               {
-                title: '任务数量',
-                children: [
-                  { title: '申请', dataIndex: 'applyCount', width: 120, render: (_, row) => renderNumber(row, 'applyCount', updateAndPersist) },
-                  { title: '补件', dataIndex: 'patchCount', width: 120, render: (_, row) => renderNumber(row, 'patchCount', updateAndPersist) },
-                  { title: '审批', dataIndex: 'approveCount', width: 120, render: (_, row) => renderNumber(row, 'approveCount', updateAndPersist) },
-                ],
+                title: '任务截止日期',
+                dataIndex: 'dueDate',
+                width: 170,
+                render: (_, row) => (
+                  <DatePicker
+                    value={row.dueDate ? dayjs(row.dueDate) : null}
+                    format="YYYY-MM-DD"
+                    allowClear={false}
+                    disabled={isArchivedRow(row)}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(value) => updateAndPersist(row.id, 'dueDate', value ? value.format('YYYY-MM-DD') : '')}
+                    style={{ width: '100%' }}
+                  />
+                ),
               },
               {
-                title: '执行信息',
-                children: [
-                  { title: '状态', dataIndex: 'status', width: 140, render: (_, row) => renderStatus(row, selectOptions.status, updateAndPersist) },
-                  {
-                    title: '子任务',
-                    dataIndex: 'subTaskCount',
-                    width: 120,
-                    render: (_, row) => (
-                      <Button size="small" onClick={() => setActiveMainTaskId(row.id)}>
-                        {row.subTaskCount || 0} 个
-                      </Button>
-                    ),
-                  },
-                  {
-                    title: '备注',
-                    dataIndex: 'remark',
-                    width: 220,
-                    render: (_, row) => (
-                      <Input
-                        value={row.remark}
-                        placeholder="填写备注"
-                        onChange={(event) => patchDraftRow(row.id, 'remark', event.target.value)}
-                        onBlur={() => persistDraftRow(row.id)}
-                      />
-                    ),
-                  },
-                ],
+                title: '任务完成度',
+                dataIndex: 'completion',
+                width: 110,
+                render: (_, row) => (
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    value={row.completion}
+                    formatter={(value) => `${value}%`}
+                    parser={(value) => Number(value?.replace('%', '') || 0)}
+                    disabled={isArchivedRow(row)}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(value) => updateAndPersist(row.id, 'completion', Number(value || 0))}
+                    style={{ width: '100%' }}
+                  />
+                ),
               },
               {
                 title: '操作',
                 fixed: 'right',
-                width: 100,
+                width: 180,
                 render: (_, row) => (
-                  <Popconfirm title="确认删除这一行？" onConfirm={() => deleteMutation.mutate(row.id)}>
-                    <Button danger size="small" loading={deleteMutation.isPending}>删除</Button>
-                  </Popconfirm>
+                  <Space>
+                    <Button size="small" onClick={() => setActiveMainTaskId(row.id)}>
+                      {isArchivedRow(row) ? '查看子任务' : '编辑子任务'}
+                    </Button>
+                    <Popconfirm title="确认删除这个主任务？" onConfirm={() => deleteMutation.mutate(row.id)}>
+                      <Button danger size="small" disabled={isArchivedRow(row)} loading={deleteMutation.isPending}>删除</Button>
+                    </Popconfirm>
+                  </Space>
                 ),
               },
             ]}
-            scroll={{ x: 1700 }}
+            rowClassName={(row) => `multi-task-row multi-task-row-${getStatusClassName(row.status)}`}
+            onRow={(row) => ({
+              onClick: () => setActiveMainTaskId(row.id),
+            })}
+            scroll={{ x: 1100 }}
             pagination={{ pageSize: 20, showSizeChanger: true }}
           />
         </ProCard>
@@ -288,20 +277,62 @@ export function MultiTaskTablePage() {
         >
           <div className="page-stack">
             {activeMainTask && (
-              <Descriptions bordered size="small" column={2}>
-                <Descriptions.Item label="主任务编号">{activeMainTask.id}</Descriptions.Item>
-                <Descriptions.Item label="状态">
-                  <Tag color={activeMainTask.status === '已完成' ? 'success' : activeMainTask.status === '执行中' ? 'processing' : 'default'}>
-                    {activeMainTask.status}
-                  </Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="产品">{activeMainTask.product}</Descriptions.Item>
-                <Descriptions.Item label="负责人">{activeMainTask.owner || '-'}</Descriptions.Item>
-                <Descriptions.Item label="区域">
-                  {activeMainTask.environment} / {activeMainTask.origin} / {activeMainTask.region} / {activeMainTask.city}
-                </Descriptions.Item>
-                <Descriptions.Item label="备注">{activeMainTask.remark || '-'}</Descriptions.Item>
-              </Descriptions>
+              <>
+                <div className="main-task-remark">
+                  <div className="main-task-remark-header">
+                    <Typography.Text strong>主任务备注</Typography.Text>
+                    {!remarkEditing && !activeMainTaskArchived && (
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => setRemarkEditing(true)}
+                      />
+                    )}
+                  </div>
+                  {remarkEditing ? (
+                    <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                      <TextArea
+                        autoSize={{ minRows: 2, maxRows: 6 }}
+                        value={remarkDraft}
+                        placeholder="填写主任务备注"
+                        disabled={activeMainTaskArchived}
+                        onChange={(event) => setRemarkDraft(event.target.value)}
+                        onBlur={saveMainTaskRemark}
+                      />
+                      <Space>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setRemarkDraft(activeMainTask.remark || '');
+                            setRemarkEditing(false);
+                          }}
+                        >
+                          取消
+                        </Button>
+                      </Space>
+                    </Space>
+                  ) : (
+                    <Typography.Paragraph className="main-task-remark-text">
+                      {activeMainTask.remark || '暂无备注'}
+                    </Typography.Paragraph>
+                  )}
+                </div>
+
+                <Descriptions bordered size="small" column={2}>
+                  <Descriptions.Item label="任务名称">{activeMainTask.taskName}</Descriptions.Item>
+                  <Descriptions.Item label="任务类别">{activeMainTask.taskCategory}</Descriptions.Item>
+                  <Descriptions.Item label="状态">
+                    <Tag color={activeMainTask.status === '已完成' ? 'success' : activeMainTask.status === '执行中' ? 'processing' : 'default'}>
+                      {activeMainTask.status}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="完成度">
+                    {activeMainTask.completion}%
+                  </Descriptions.Item>
+                  <Descriptions.Item label="截止日期">{activeMainTask.dueDate}</Descriptions.Item>
+                </Descriptions>
+              </>
             )}
 
             <ProCard
@@ -309,6 +340,7 @@ export function MultiTaskTablePage() {
               extra={
                 <Button
                   icon={<PlusOutlined />}
+                  disabled={activeMainTaskArchived}
                   loading={addSubTaskMutation.isPending}
                   onClick={() => activeMainTaskId && addSubTaskMutation.mutate(activeMainTaskId)}
                 >
@@ -325,37 +357,21 @@ export function MultiTaskTablePage() {
                 dataSource={subTaskQuery.data?.items || []}
                 pagination={{ pageSize: 8 }}
                 columns={[
-                  { title: '子任务编号', dataIndex: 'id', width: 120 },
                   {
                     title: '子任务名称',
                     dataIndex: 'title',
-                    width: 180,
+                    width: 240,
                     render: (_, row) => (
-                      <Input
+                      <TextArea
+                        className="subtask-title-textarea"
+                        autoSize={{ minRows: 1, maxRows: 5 }}
                         defaultValue={row.title}
+                        disabled={activeMainTaskArchived}
                         onBlur={(event) => {
-                          if (activeMainTaskId && event.target.value !== row.title) {
+                          if (!activeMainTaskArchived && activeMainTaskId && event.target.value !== row.title) {
                             updateSubTaskMutation.mutate({
                               rowId: activeMainTaskId,
                               subTask: { ...row, title: event.target.value },
-                            });
-                          }
-                        }}
-                      />
-                    ),
-                  },
-                  {
-                    title: '负责人',
-                    dataIndex: 'assignee',
-                    width: 140,
-                    render: (_, row) => (
-                      <Input
-                        defaultValue={row.assignee}
-                        onBlur={(event) => {
-                          if (activeMainTaskId && event.target.value !== row.assignee) {
-                            updateSubTaskMutation.mutate({
-                              rowId: activeMainTaskId,
-                              subTask: { ...row, assignee: event.target.value },
                             });
                           }
                         }}
@@ -369,9 +385,10 @@ export function MultiTaskTablePage() {
                     render: (_, row) => (
                       <Select
                         value={row.status}
+                        disabled={activeMainTaskArchived}
                         options={['未开始', '进行中', '已完成'].map((item) => ({ label: item, value: item }))}
                         onChange={(value) => {
-                          if (activeMainTaskId) {
+                          if (!activeMainTaskArchived && activeMainTaskId) {
                             updateSubTaskMutation.mutate({
                               rowId: activeMainTaskId,
                               subTask: { ...row, status: value },
@@ -383,62 +400,6 @@ export function MultiTaskTablePage() {
                     ),
                   },
                   {
-                    title: '工作量',
-                    dataIndex: 'workload',
-                    width: 110,
-                    render: (_, row) => (
-                      <InputNumber
-                        min={0}
-                        value={row.workload}
-                        onChange={(value) => {
-                          if (activeMainTaskId) {
-                            updateSubTaskMutation.mutate({
-                              rowId: activeMainTaskId,
-                              subTask: { ...row, workload: Number(value || 0) },
-                            });
-                          }
-                        }}
-                        style={{ width: '100%' }}
-                      />
-                    ),
-                  },
-                  {
-                    title: '截止日期',
-                    dataIndex: 'dueDate',
-                    width: 150,
-                    render: (_, row) => (
-                      <Input
-                        defaultValue={row.dueDate}
-                        placeholder="YYYY-MM-DD"
-                        onBlur={(event) => {
-                          if (activeMainTaskId && event.target.value !== row.dueDate) {
-                            updateSubTaskMutation.mutate({
-                              rowId: activeMainTaskId,
-                              subTask: { ...row, dueDate: event.target.value },
-                            });
-                          }
-                        }}
-                      />
-                    ),
-                  },
-                  {
-                    title: '备注',
-                    dataIndex: 'remark',
-                    render: (_, row) => (
-                      <Input
-                        defaultValue={row.remark}
-                        onBlur={(event) => {
-                          if (activeMainTaskId && event.target.value !== row.remark) {
-                            updateSubTaskMutation.mutate({
-                              rowId: activeMainTaskId,
-                              subTask: { ...row, remark: event.target.value },
-                            });
-                          }
-                        }}
-                      />
-                    ),
-                  },
-                  {
                     title: '操作',
                     width: 90,
                     render: (_, row) => (
@@ -446,11 +407,12 @@ export function MultiTaskTablePage() {
                         title="确认删除这个子任务？"
                         onConfirm={() => activeMainTaskId && deleteSubTaskMutation.mutate({ rowId: activeMainTaskId, subTaskId: row.id })}
                       >
-                        <Button danger size="small" loading={deleteSubTaskMutation.isPending}>删除</Button>
+                        <Button danger size="small" disabled={activeMainTaskArchived} loading={deleteSubTaskMutation.isPending}>删除</Button>
                       </Popconfirm>
                     ),
                   },
                 ]}
+                scroll={{ x: 900 }}
               />
             </ProCard>
           </div>
@@ -465,10 +427,12 @@ function renderSelect<K extends keyof MultiTaskRowDto>(
   key: K,
   options: string[],
   updateRow: (id: string, key: K, value: MultiTaskRowDto[K]) => void,
+  disabled = false,
 ) {
   return (
     <Select
       value={row[key] as string}
+      disabled={disabled}
       options={options.map((item) => ({ label: item, value: item }))}
       onChange={(value) => updateRow(row.id, key, value as MultiTaskRowDto[K])}
       style={{ width: '100%' }}
@@ -476,19 +440,29 @@ function renderSelect<K extends keyof MultiTaskRowDto>(
   );
 }
 
-function renderNumber<K extends 'applyCount' | 'patchCount' | 'approveCount'>(
-  row: MultiTaskRowDto,
-  key: K,
-  updateRow: (id: string, key: K, value: number) => void,
-) {
-  return (
-    <InputNumber<number>
-      min={0}
-      value={row[key]}
-      onChange={(value) => updateRow(row.id, key, Number(value || 0))}
-      style={{ width: '100%' }}
-    />
-  );
+function buildColumnFilters(options: string[]) {
+  return options.map((item) => ({ text: item, value: item }));
+}
+
+function mergeOptions<T extends string>(source: string[], fallback: T[]) {
+  return Array.from(new Set([...source, ...fallback])) as T[];
+}
+
+function isArchivedRow(row: MultiTaskRowDto) {
+  return row.status === '存档';
+}
+
+function getStatusClassName(status: MultiTaskRowDto['status']) {
+  if (status === '执行中') {
+    return 'running';
+  }
+  if (status === '已完成') {
+    return 'completed';
+  }
+  if (status === '存档') {
+    return 'archived';
+  }
+  return 'pending';
 }
 
 function renderStatus(
@@ -497,16 +471,12 @@ function renderStatus(
   updateRow: (id: string, key: 'status', value: MultiTaskRowDto['status']) => void,
 ) {
   return (
-    <Space>
-      <Select
-        value={row.status}
-        options={options.map((item) => ({ label: item, value: item }))}
-        onChange={(value) => updateRow(row.id, 'status', value)}
-        style={{ width: 100 }}
-      />
-      <Tag color={row.status === '已完成' ? 'success' : row.status === '执行中' ? 'processing' : 'default'}>
-        {row.status}
-      </Tag>
-    </Space>
+    <Select
+      value={row.status}
+      options={options.map((item) => ({ label: item, value: item }))}
+      onChange={(value) => updateRow(row.id, 'status', value)}
+      onClick={(event) => event.stopPropagation()}
+      style={{ width: '100%' }}
+    />
   );
 }

@@ -12,7 +12,7 @@
 | `apps/backend/jobs/views.py` | job 创建、查询、日志查询接口 |
 | `apps/backend/jobs/models.py` | Job、JobLog 数据模型，定义任务状态和阶段 |
 | `apps/backend/jobs/serializers.py` | Job 返回给前端的数据结构，包括进度步骤 |
-| `apps/backend/jobs/management/commands/runworker.py` | 本地 worker，串行领取并执行任务 |
+| `apps/backend/jobs/management/commands/runworker.py` | worker，串行领取并执行任务 |
 | `apps/backend/workflows/registry.py` | worker 业务流程分发和产品申请 mock 流程 |
 
 ## 整体链路
@@ -25,7 +25,7 @@
   -> 前端 POST /api/jobs/ 创建 job
   -> Django 写入 Job，返回 job_id
   -> 前端轮询 GET /api/jobs/ 和 GET /api/jobs/{id}/
-  -> 本地 worker 从 SQLite 领取 pending job
+  -> worker 从任务表领取 pending job
   -> worker 执行 product_apply workflow
   -> worker 写入 JobLog、progress、stage、result
   -> 前端展示执行结果、执行进度和日志
@@ -86,7 +86,6 @@ POST /api/jobs/
   "workflow": "product_apply",
   "search_form": {
     "environment": "env_1",
-    "serviceType": "new",
     "product": "product_a",
     "location": "location_1",
     "jurisdiction": "jurisdiction_1",
@@ -137,7 +136,7 @@ job = Job.objects.create(
 同时写一条日志：
 
 ```text
-任务已创建，等待本机 worker 执行
+任务已创建，等待 worker 执行
 ```
 
 这个接口只负责创建任务，不执行耗时逻辑。

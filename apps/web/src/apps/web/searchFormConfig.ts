@@ -58,11 +58,6 @@ const environments: SelectOption[] = [
   { label: '环境3', value: 'env_3' },
 ];
 
-const serviceTypeOptions: SelectOption[] = [
-  { label: '新办', value: 'new' },
-  { label: '变更', value: 'change' },
-];
-
 const productCatalog: ProductConfig[] = [
   {
     id: 'product_a',
@@ -250,6 +245,7 @@ export const cascadeResetMap: Record<string, string[]> = {
   product: ['location', 'jurisdiction', 'outlet'],
   location: ['jurisdiction', 'outlet'],
   jurisdiction: ['outlet'],
+  companyName: ['legalPerson'],
 };
 
 export const searchPageBehavior = {
@@ -283,22 +279,10 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       options: environments,
     },
     {
-      name: 'serviceType',
-      label: '办理类型',
-      type: 'select',
-      span: 4,
-      editable: true,
-      visible: true,
-      submit: true,
-      required: true,
-      defaultValue: serviceTypeOptions[0]?.value,
-      options: serviceTypeOptions,
-    },
-    {
       name: 'product',
       label: '产品',
       type: 'select',
-      span: 4,
+      span: 5,
       editable: true,
       visible: true,
       submit: true,
@@ -310,7 +294,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       name: 'location',
       label: '所在地',
       type: 'select',
-      span: 4,
+      span: 5,
       editable: true,
       visible: true,
       submit: true,
@@ -322,7 +306,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       name: 'jurisdiction',
       label: '辖行',
       type: 'select',
-      span: 4,
+      span: 5,
       editable: true,
       visible: true,
       submit: true,
@@ -334,7 +318,7 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
       name: 'outlet',
       label: '网点',
       type: 'select',
-      span: 4,
+      span: 5,
       editable: true,
       visible: true,
       submit: true,
@@ -344,16 +328,41 @@ export function buildSearchConfig(values: Record<string, unknown> = {}): FieldCo
     },
   ];
 
-  const commonWithProductRules = commonFields.map((field) => ({
-    ...field,
-    ...(product.fieldOverrides?.[field.name] || {}),
-  }));
+  const commonWithProductRules = commonFields.map((field) => applyDynamicFieldRules(
+    {
+      ...field,
+      ...(product.fieldOverrides?.[field.name] || {}),
+    },
+    values,
+  ));
 
   return [
     ...hierarchyFields,
     ...commonWithProductRules,
     ...(product.extraFields || []),
   ];
+}
+
+function applyDynamicFieldRules(field: FieldConfig, values: Record<string, unknown>): FieldConfig {
+  if (field.name !== 'legalPerson') {
+    return field;
+  }
+  const hasCompanyName = String(values.companyName || '').trim().length > 0;
+  if (hasCompanyName) {
+    return {
+      ...field,
+      editable: true,
+      checkedLabel: '法人自动发送',
+      uncheckedLabel: '法人不上送',
+    };
+  }
+  return {
+    ...field,
+    editable: false,
+    defaultValue: false,
+    checkedLabel: '不维护，上送为农户',
+    uncheckedLabel: '不维护，上送为农户',
+  };
 }
 
 export function getInitialSearchValues() {

@@ -25,7 +25,7 @@ def jobs_view(request):
         current_step=0,
         total_steps=6,
     )
-    JobLog.objects.create(job=job, message="任务已创建，等待本机 worker 执行")
+    JobLog.objects.create(job=job, message="任务已创建，等待 worker 执行")
     return JsonResponse(serialize_job(job), status=201)
 
 

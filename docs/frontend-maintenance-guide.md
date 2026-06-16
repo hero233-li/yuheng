@@ -16,7 +16,7 @@ apps/web/src
 | --- | --- |
 | `apps/web/src/main.tsx` | 路由入口 |
 | `apps/web/src/components/AppShell.tsx` | 左侧菜单、顶部导航、页签、面包屑 |
-| `apps/web/src/apps/web/` | 本机页面 |
+| `apps/web/src/apps/web/` | 业务页面 |
 | `apps/web/src/api/` | 前端请求后端接口 |
 | `apps/web/src/stores/` | 前端状态，如外观、菜单配置 |
 | `apps/web/src/types/` | 前端类型定义 |
@@ -137,7 +137,7 @@ apps/web/src/apps/web/SettingsPage.tsx
 { path: '/page-a', label: '页面A' }
 ```
 
-注意：菜单管理页当前只读展示，不在页面里编辑是否允许多开。真正的多开策略仍然维护在 `apps/web/src/stores/appPreferences.ts`。
+注意：菜单管理页可以直接切换“复用页签 / 允许多开”，设置会写入浏览器 localStorage。默认值仍然维护在 `apps/web/src/stores/appPreferences.ts`。
 
 ## 新增接口
 
@@ -147,7 +147,7 @@ apps/web/src/apps/web/SettingsPage.tsx
 apps/web/src/api/
 ```
 
-本机接口：
+API 封装：
 
 ```text
 apps/web/src/api/app.ts
@@ -490,7 +490,7 @@ export const pageAFields = [
 | 重置密码 | `ResetPasswordPage.tsx` | 简单表单 + 执行进度 |
 | 多维任务表格 | `MultiTaskTablePage.tsx` | 多维表格 |
 | 卡片任务 | `GroupedCardSearchPage.tsx` | 分组卡片任务 |
-| 历史调用记录 | `PersonalCenterPage.tsx` | 调用分析 + 调用明细 |
+| 日志中心 | `PersonalCenterPage.tsx` | 接口日志列表 + 请求/响应详情 |
 
 ## 前端请求规范
 

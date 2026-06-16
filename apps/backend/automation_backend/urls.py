@@ -7,6 +7,7 @@ urlpatterns = [
     path("api/health/", core_views.health),
     path("api/invocations/", core_views.invocations_view),
     path("api/invocations/summary/", core_views.invocations_summary),
+    path("api/invocations/<int:record_id>/", core_views.invocation_detail),
     path("api/mock/multi-task-table/", core_views.multi_task_table_mock),
     path("api/mock/multi-task-table/rows/", core_views.multi_task_table_add_row),
     path("api/mock/multi-task-table/rows/<str:row_id>/", core_views.multi_task_table_row),

@@ -93,11 +93,12 @@ apps/web/src/api/app.ts
 | `getSearchForm2Config` | `GET /api/mock/search-form-2/config/` | 数据维护配置 |
 | `searchGroupedCards` | `POST /api/mock/grouped-cards/` | 卡片任务搜索 |
 | `recordInvocation` | `POST /api/invocations/` | 写入菜单访问记录 |
-| `getInvocationSummary` | `GET /api/invocations/summary/` | 查询历史调用统计和明细 |
+| `getInvocationSummary` | `GET /api/invocations/summary/` | 查询日志中心统计和接口日志列表 |
+| `getInvocationRecord` | `GET /api/invocations/{id}/` | 查询单条接口日志详情 |
 
 重置密码页面不需要新增专用 API，前端直接调用 `createJob` 创建 `reset_password` 异步任务，再轮询 `getJob` 展示进度。
 
-历史调用记录页面的数据来自 SQLite。前端菜单访问通过 `recordInvocation` 写入，后端接口调用由 Django middleware 自动写入。
+日志中心页面的数据来自 SQLite。前端菜单访问通过 `recordInvocation` 写入，但日志中心默认只展示接口调用；后端接口调用由 Django middleware 自动写入请求参数、响应参数和响应日志。`/api/invocations/` 自身不会被记录，避免刷新日志中心时产生自循环日志。
 
 ## 页面调用方式
 

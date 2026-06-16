@@ -87,7 +87,7 @@ apps/backend/core/models.py
 用途：
 
 ```text
-保存菜单访问和接口调用记录，用于历史调用记录页面。
+保存菜单访问和接口调用记录，用于日志中心页面。
 ```
 
 写入来源：
@@ -96,6 +96,8 @@ apps/backend/core/models.py
 | --- | --- |
 | 前端菜单访问 | `POST /api/invocations/` |
 | 后端 API 调用 | `core.middleware.InvocationRecordMiddleware` 自动写入 |
+
+日志中心展示接口调用记录。中间件会记录请求参数、响应参数、响应日志；`/api/invocations/` 自身会被排除，避免日志中心查询接口反复记录自己。
 
 核心字段：
 

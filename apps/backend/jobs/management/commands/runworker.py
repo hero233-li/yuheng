@@ -46,7 +46,7 @@ class Command(BaseCommand):
             job.progress = 15
             job.started_at = timezone.now()
             job.save(update_fields=["status", "stage", "progress", "started_at"])
-            JobLog.objects.create(job=job, message="本机 worker 已开始执行")
+            JobLog.objects.create(job=job, message="worker 已开始执行")
             return job
 
     def _run_job(self, job):

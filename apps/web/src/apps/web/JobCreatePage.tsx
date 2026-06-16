@@ -4,7 +4,6 @@ import {
   App,
   Button,
   Col,
-  Descriptions,
   Drawer,
   Form,
   Input,
@@ -116,6 +115,10 @@ export function JobCreatePage() {
 
   function normalizeCascadeValues(changedValues: Record<string, unknown>) {
     const changedName = Object.keys(changedValues)[0];
+    if (changedName === 'companyName' && !String(changedValues.companyName || '').trim()) {
+      form.setFieldsValue({ legalPerson: false });
+      return;
+    }
     const resetFields = cascadeResetMap[changedName];
     if (!resetFields) {
       return;
@@ -285,32 +288,38 @@ export function JobCreatePage() {
       >
         {selectedJob && (
           <div className="page-stack">
-            <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label="申请项目">{selectedJob.name}</Descriptions.Item>
-              <Descriptions.Item label="执行状态">
-                <Space>
+            <div className="job-detail-summary">
+              <div className="job-detail-item">
+                <Typography.Text type="secondary">申请项目</Typography.Text>
+                <Typography.Text strong>{selectedJob.name}</Typography.Text>
+              </div>
+              <div className="job-detail-item">
+                <Typography.Text type="secondary">执行状态</Typography.Text>
+                <Space wrap>
                   <Tag color={statusColor[selectedJob.status]}>{selectedJob.status}</Tag>
                   <Tag color={stageColor[selectedJob.stage]}>{selectedJob.stage_label}</Tag>
                 </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="提交参数">
-                <Typography.Text code>
+              </div>
+              <div className="job-detail-item job-detail-item-full">
+                <Typography.Text type="secondary">提交参数</Typography.Text>
+                <pre className="job-detail-code">
                   {JSON.stringify(selectedJob.payload.search_form || selectedJob.payload, null, 2)}
-                </Typography.Text>
-              </Descriptions.Item>
-            </Descriptions>
+                </pre>
+              </div>
+            </div>
 
             <ProCard title="执行进度">
               <Progress
                 percent={selectedJob.progress}
                 status={selectedJob.status === 'failed' ? 'exception' : selectedJob.status === 'success' ? 'success' : 'active'}
               />
-              <Steps
-                style={{ marginTop: 18 }}
-                current={selectedJob.stage_index}
-                status={selectedJob.status === 'failed' ? 'error' : selectedJob.status === 'success' ? 'finish' : 'process'}
-                items={selectedJob.stage_steps.map((step) => ({ title: step.title }))}
-              />
+              <div className="job-steps-wrap">
+                <Steps
+                  current={selectedJob.stage_index}
+                  status={selectedJob.status === 'failed' ? 'error' : selectedJob.status === 'success' ? 'finish' : 'process'}
+                  items={selectedJob.stage_steps.map((step) => ({ title: step.title }))}
+                />
+              </div>
             </ProCard>
 
             <ProCard title="执行记录" loading={logsQuery.isLoading}>

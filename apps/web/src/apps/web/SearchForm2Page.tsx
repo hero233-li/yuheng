@@ -111,7 +111,7 @@ export function SearchForm2Page() {
   }
 
   return (
-    <PageContainer title="数据维护" subTitle="固定环境与操作配置，执行后展示后端返回进度">
+    <PageContainer title={false}>
       <div className="page-stack">
         <ProCard title="执行条件" loading={configQuery.isLoading}>
           <Form form={form} layout="vertical" onFinish={handleExecute}>

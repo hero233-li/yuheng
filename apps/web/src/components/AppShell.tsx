@@ -9,7 +9,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, ConfigProvider, Layout, Menu, Tabs, Tag, Typography, theme } from 'antd';
+import { App, Breadcrumb, Button, ConfigProvider, Input, Layout, Menu, Modal, Tabs, Tag, Typography, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
@@ -18,6 +18,8 @@ import { useAppPreferences } from '../stores/appPreferences';
 import { recordInvocation } from '../api/app';
 
 const { Header, Sider, Content } = Layout;
+const PERSONAL_CENTER_ACCESS_CODE = 'yu123';
+const protectedMenuPaths = new Set(['/multi-task-table', '/personal-center', '/system-settings']);
 
 interface AppMenuItem {
   key: string;
@@ -48,10 +50,10 @@ const menuItems: AppMenuItem[] = [
   {
     key: 'group-three',
     icon: <SettingOutlined />,
-    label: '一级菜单三',
+    label: '个人中心',
     children: [
       { key: '/multi-task-table', icon: <BarsOutlined />, label: '多维任务表格' },
-      { key: '/personal-center', icon: <HistoryOutlined />, label: '历史调用记录' },
+      { key: '/personal-center', icon: <HistoryOutlined />, label: '日志中心' },
       { key: '/system-settings', icon: <SettingOutlined />, label: '系统设置' },
     ],
   },
@@ -60,7 +62,8 @@ const menuItems: AppMenuItem[] = [
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const title = '内网自动化工具';
+  const { message } = App.useApp();
+  const title = '玉衡';
   const {
     themeMode,
     primaryColor,
@@ -79,6 +82,10 @@ export function AppShell() {
   } = useAppPreferences();
   const [tabs, setTabs] = useState<Array<{ key: string; path: string; label: string }>>([]);
   const [activeTabKey, setActiveTabKey] = useState('');
+  const [personalCenterUnlocked, setPersonalCenterUnlocked] = useState(false);
+  const [accessModalOpen, setAccessModalOpen] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
+  const [pendingProtectedPath, setPendingProtectedPath] = useState<string | null>(null);
   const flatMenuItems = useMemo(() => flattenMenu(menuItems), [menuItems]);
   const currentMenu = flatMenuItems.find((item) => item.key === location.pathname);
   const breadcrumbItems = useMemo(() => buildBreadcrumb(menuItems, location.pathname), [location.pathname, menuItems]);
@@ -121,6 +128,16 @@ export function AppShell() {
     if (!target) {
       return;
     }
+    if (protectedMenuPaths.has(path) && !personalCenterUnlocked) {
+      setPendingProtectedPath(path);
+      setAccessCode('');
+      setAccessModalOpen(true);
+      return;
+    }
+    openAllowedMenu(path, target);
+  }
+
+  function openAllowedMenu(path: string, target: AppMenuItem) {
     if ((menuTabModes[path] || 'single') === 'multi') {
       const samePathCount = tabs.filter((item) => item.path === path).length;
       const tabKey = `${path}::${Date.now()}`;
@@ -133,6 +150,21 @@ export function AppShell() {
       setActiveTabKey(tabKey);
     }
     navigate(path);
+  }
+
+  function verifyAccessCode() {
+    if (accessCode !== PERSONAL_CENTER_ACCESS_CODE) {
+      message.error('校验码不正确');
+      return;
+    }
+    const target = pendingProtectedPath ? flatMenuItems.find((item) => item.key === pendingProtectedPath) : undefined;
+    setPersonalCenterUnlocked(true);
+    setAccessModalOpen(false);
+    setAccessCode('');
+    setPendingProtectedPath(null);
+    if (target && pendingProtectedPath) {
+      openAllowedMenu(pendingProtectedPath, target);
+    }
   }
 
   const antdMenuItems = toAntdMenuItems(menuItems);
@@ -182,11 +214,11 @@ export function AppShell() {
                   <Breadcrumb items={breadcrumbItems.map((label) => ({ title: label }))} />
                 </div>
                 <Typography.Text type="secondary" className="app-header-subtitle">
-                  本机独立执行任务，数据保存在本机
+                  自动化流程管理与任务执行
                 </Typography.Text>
               </div>
             </div>
-            <Tag color="blue">本地网络版</Tag>
+            <Tag color="blue">Web 版</Tag>
           </Header>
           {tabs.length > 0 && (
             <div className="app-tabs">
@@ -233,6 +265,26 @@ export function AppShell() {
           </Content>
         </Layout>
       </Layout>
+      <Modal
+        title="请输入校验码"
+        open={accessModalOpen}
+        okText="确认"
+        cancelText="取消"
+        onOk={verifyAccessCode}
+        onCancel={() => {
+          setAccessModalOpen(false);
+          setAccessCode('');
+          setPendingProtectedPath(null);
+        }}
+      >
+        <Input.Password
+          autoFocus
+          placeholder="请输入校验码"
+          value={accessCode}
+          onChange={(event) => setAccessCode(event.target.value)}
+          onPressEnter={verifyAccessCode}
+        />
+      </Modal>
     </ConfigProvider>
   );
 }
