@@ -211,7 +211,7 @@ export function JobCreatePage() {
   return (
     <PageContainer title={false}>
       <div className="page-stack">
-        <ProCard title="申请条件">
+        <ProCard >
           <Form
             form={form}
             layout="vertical"
@@ -227,6 +227,7 @@ export function JobCreatePage() {
                     label={field.label}
                     rules={field.required ? [{ required: true, message: `请填写${field.label}` }] : undefined}
                     valuePropName={field.type === 'switch' ? 'checked' : 'value'}
+                    style={{ marginBottom: 4 }}
                   >
                     {renderField(field)}
                   </Form.Item>
