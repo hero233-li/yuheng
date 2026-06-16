@@ -11,12 +11,13 @@ type DetailKey = 'request_params' | 'response_params' | 'response_log';
 type DateRangeValue = [Dayjs | null, Dayjs | null] | null;
 
 const { RangePicker } = DatePicker;
+const DEFAULT_LOG_RANGE_HOURS = 48;
 
 export function PersonalCenterPage() {
   const [selectedRecord, setSelectedRecord] = useState<InvocationRecordDto | null>(null);
   const [activePeriod, setActivePeriod] = useState<PeriodKey>('week');
   const [keyword, setKeyword] = useState('');
-  const [dateRange, setDateRange] = useState<DateRangeValue>(null);
+  const [dateRange, setDateRange] = useState<DateRangeValue>(() => getDefaultLogDateRange());
   const summaryQuery = useQuery({
     queryKey: ['invocation-summary'],
     queryFn: getInvocationSummary,
@@ -125,14 +126,15 @@ export function PersonalCenterPage() {
             />
             <Button
               onClick={() => {
-                setDateRange(null);
+                setDateRange(getDefaultLogDateRange());
                 setKeyword('');
               }}
             >
               重置
             </Button>
+            <Button onClick={() => setDateRange(null)}>全部时间</Button>
             <Typography.Text type="secondary">
-              共 {logs.length} 条，当前筛选 {filteredLogs.length} 条
+              默认查询最近 {DEFAULT_LOG_RANGE_HOURS} 小时；共 {logs.length} 条，当前筛选 {filteredLogs.length} 条
             </Typography.Text>
           </div>
           <ProTable<InvocationRecordDto>
@@ -240,6 +242,10 @@ export function PersonalCenterPage() {
       </Drawer>
     </PageContainer>
   );
+}
+
+function getDefaultLogDateRange(): [Dayjs, Dayjs] {
+  return [dayjs().subtract(DEFAULT_LOG_RANGE_HOURS, 'hour'), dayjs()];
 }
 
 function LogBlock({ title, content, loading, dark = false }: { title: string; content: string; loading?: boolean; dark?: boolean }) {
