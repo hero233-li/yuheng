@@ -374,5 +374,5 @@ submit = true
 真实业务接入点：
 
 ```text
-apps/backend/workflows/registry.py
+apps/backend/workflows/product_apply/workflow.py
 ```

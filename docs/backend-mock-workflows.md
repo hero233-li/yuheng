@@ -8,28 +8,55 @@
 
 | 类型 | 说明 | 主要文件 |
 | --- | --- | --- |
-| 异步任务流程 | 前端提交任务，`worker` 串行执行步骤，写入 `JobLog`，前端轮询任务状态和日志 | `apps/backend/workflows/registry.py` |
+| 异步任务流程 | 前端提交任务，`worker` 串行执行步骤，写入 `JobLog`，前端轮询任务状态和日志 | `apps/backend/workflows/*/workflow.py` |
 | 普通 mock 接口 | 前端直接请求，后端立即返回数据，用于配置、表格、卡片、导出等 | `apps/backend/core/views.py` |
 
 后续接真实系统时，优先替换底层 `_call_*`、`_query_*`、`_write_*` 方法，不建议直接把真实接口逻辑写在 Django view 里。
 
 ## 异步任务入口
 
-入口函数：
+入口函数仍在：
 
 ```text
 apps/backend/workflows/registry.py
 ```
 
+但 `registry.py` 只做分发，不承载具体业务流程：
+
 ```py
+WORKFLOW_RUNNERS = {
+    "product_apply": run_product_apply_workflow,
+    "search_form_2": run_search_form_2_workflow,
+    "reset_password": run_reset_password_workflow,
+}
+
 def run_workflow(job):
     workflow = job.payload.get("workflow") or "product_apply"
-    if workflow == "search_form_2":
-        return run_search_form_2_workflow(job)
-    if workflow == "reset_password":
-        return run_reset_password_workflow(job)
-    return run_product_apply_workflow(job)
+    runner = WORKFLOW_RUNNERS.get(workflow, run_product_apply_workflow)
+    return runner(job)
 ```
+
+具体流程文件：
+
+| workflow | 目录 | 入口文件 |
+| --- | --- | --- |
+| `product_apply` | `apps/backend/workflows/product_apply/` | `workflow.py` |
+| `search_form_2` | `apps/backend/workflows/search_form_2/` | `workflow.py` |
+| `reset_password` | `apps/backend/workflows/reset_password/` | `workflow.py` |
+
+通用执行器：
+
+```text
+apps/backend/workflows/common.py
+```
+
+`common.py` 里放：
+
+| 方法/类 | 说明 |
+| --- | --- |
+| `WorkflowStep` | 每个 workflow 的步骤定义 |
+| `run_steps` | 统一更新 job 阶段、进度、日志 |
+| `parse_payload` | 统一解析 `biz_payload` |
 
 前端创建任务时，会通过 `payload.workflow` 指定流程：
 
@@ -41,11 +68,13 @@ def run_workflow(job):
 
 ## 产品申请
 
-流程类：
+流程文件：
 
 ```text
-ProductApplyWorkflow
+apps/backend/workflows/product_apply/workflow.py
 ```
+
+流程类：`ProductApplyWorkflow`
 
 执行步骤：
 
@@ -71,11 +100,13 @@ ProductApplyWorkflow
 
 ## 数据维护
 
-流程类：
+流程文件：
 
 ```text
-SearchForm2Workflow
+apps/backend/workflows/search_form_2/workflow.py
 ```
+
+流程类：`SearchForm2Workflow`
 
 执行步骤：
 
@@ -105,11 +136,13 @@ GET /api/mock/search-form-2/results/{result_id}/export/
 
 ## 重置密码
 
-流程类：
+流程文件：
 
 ```text
-ResetPasswordWorkflow
+apps/backend/workflows/reset_password/workflow.py
 ```
+
+流程类：`ResetPasswordWorkflow`
 
 执行步骤：
 
@@ -212,12 +245,14 @@ apps/backend/core/middleware.py
 
 推荐步骤：
 
-1. 在 `apps/backend/workflows/registry.py` 新增一个 `XxxWorkflow` 类。
-2. 类里提供 `build_steps`，每个步骤返回一个 `WorkflowStep("步骤名", self.handler)`。
-3. 每个 handler 返回一段执行日志文本。
-4. 把真实接口替换点放在 `_call_*`、`_query_*`、`_write_*` 方法里。
-5. 在 `run_workflow` 里按 `payload.workflow` 分发。
-6. 前端创建任务时传入对应 `workflow`。
+1. 在 `apps/backend/workflows/` 下新增一个目录，例如 `flow_a/`。
+2. 新增 `apps/backend/workflows/flow_a/__init__.py`，导出 `run_flow_a_workflow`。
+3. 新增 `apps/backend/workflows/flow_a/workflow.py`，定义 `FlowAWorkflow`。
+4. 类里提供 `build_steps`，每个步骤返回一个 `WorkflowStep("步骤名", self.handler)`。
+5. 每个 handler 返回一段执行日志文本。
+6. 把真实接口替换点放在 `_call_*`、`_query_*`、`_write_*` 方法里。
+7. 在 `apps/backend/workflows/registry.py` 的 `WORKFLOW_RUNNERS` 增加分发。
+8. 前端创建任务时传入对应 `workflow`。
 
 示例结构：
 
@@ -225,7 +260,7 @@ apps/backend/core/middleware.py
 class XxxWorkflow:
     def __init__(self, job):
         self.job = job
-        self.payload = _parse_payload(job.payload.get("biz_payload"))
+        self.payload = parse_payload(job.payload.get("biz_payload"))
         self.context = {}
 
     def build_steps(self):
@@ -241,6 +276,17 @@ class XxxWorkflow:
 
     def _call_real_service(self):
         return "MOCK_OK"
+```
+
+对应 registry：
+
+```py
+from workflows.flow_a import run_flow_a_workflow
+
+WORKFLOW_RUNNERS = {
+    ...
+    "flow_a": run_flow_a_workflow,
+}
 ```
 
 ## 新增一个普通 mock 接口

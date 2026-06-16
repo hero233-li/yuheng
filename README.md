@@ -136,6 +136,7 @@ apps/backend/data/web/db.sqlite3
 | `docs/frontend-api-requests.md` | 前端请求封装、新增接口、API 调用方式 |
 | `docs/backend-maintenance-guide.md` | Django 后端、模型、迁移、路由、mock 接口 |
 | `docs/backend-mock-workflows.md` | 后端 mock 流程、细化方法、真实接口替换点 |
+| `docs/sqlite-data-guide.md` | SQLite 表内容查看、修改、ORM 和 SQL 操作 |
 | `docs/request-worker-boundary.md` | 哪些请求直连 API，哪些必须走 worker |
 | `docs/product-apply-flow.md` | 产品申请从表单到 worker 的完整链路 |
 | `docs/search-form-config.md` | 搜索表单字段、联动、产品配置维护 |

@@ -13,7 +13,8 @@
 | `apps/backend/jobs/models.py` | Job、JobLog 数据模型，定义任务状态和阶段 |
 | `apps/backend/jobs/serializers.py` | Job 返回给前端的数据结构，包括进度步骤 |
 | `apps/backend/jobs/management/commands/runworker.py` | worker，串行领取并执行任务 |
-| `apps/backend/workflows/registry.py` | worker 业务流程分发和产品申请 mock 流程 |
+| `apps/backend/workflows/registry.py` | worker 业务流程分发 |
+| `apps/backend/workflows/product_apply/workflow.py` | 产品申请 mock 流程和真实接口替换点 |
 
 ## 整体链路
 
@@ -186,16 +187,27 @@ apps/backend/workflows/registry.py
 当前分发逻辑：
 
 ```python
+WORKFLOW_RUNNERS = {
+    "product_apply": run_product_apply_workflow,
+    "search_form_2": run_search_form_2_workflow,
+    "reset_password": run_reset_password_workflow,
+}
+
 workflow = job.payload.get("workflow") or "product_apply"
-if workflow == "search_form_2":
-    return run_search_form_2_workflow(job)
-return run_product_apply_workflow(job)
+runner = WORKFLOW_RUNNERS.get(workflow, run_product_apply_workflow)
+return runner(job)
 ```
 
 产品申请执行：
 
 ```python
 run_product_apply_workflow(job)
+```
+
+产品申请具体实现文件：
+
+```text
+apps/backend/workflows/product_apply/workflow.py
 ```
 
 这个函数负责：
@@ -209,7 +221,7 @@ run_product_apply_workflow(job)
 写入本地执行结果
 ```
 
-当前是 mock，后续真实自动化流程接在这个函数里。
+当前是 mock，后续真实自动化流程接在 `ProductApplyWorkflow` 的 `_call_*`、`_write_*` 等底层方法里。
 
 ## 状态与进度
 
@@ -490,7 +502,7 @@ apps/web/src/apps/web/JobCreatePage.tsx
 真实产品申请逻辑接在：
 
 ```text
-apps/backend/workflows/registry.py
+apps/backend/workflows/product_apply/workflow.py
 ```
 
 建议把当前 mock 步骤逐步替换：
@@ -531,5 +543,6 @@ return {
 执行类动作：必须创建 Job，由 worker 异步执行。
 前端只负责展示状态，不自己决定业务进度。
 产品、字段、联动关系优先改 searchFormConfig.ts。
-真实自动化流程优先改 workflows/registry.py。
+真实产品申请流程优先改 workflows/product_apply/workflow.py。
+registry.py 只负责 workflow 分发，不写具体业务步骤。
 ```

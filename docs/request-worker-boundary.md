@@ -83,7 +83,8 @@ React 产品申请页面
   -> Django 创建 Job
   -> SQLite 写入 pending
   -> worker 领取 pending
-  -> workflows/registry.py 执行 product_apply
+  -> workflows/registry.py 分发 product_apply
+  -> workflows/product_apply/workflow.py 执行具体步骤
   -> 写入阶段、进度、日志、结果
   -> React 轮询并展示
 ```
@@ -123,16 +124,20 @@ await createJob({
 });
 ```
 
-2. 后端在 `apps/backend/workflows/registry.py` 增加分发：
+2. 后端新增流程目录，例如 `apps/backend/workflows/flow_a/workflow.py`，实现 `run_flow_a_workflow`。
+
+3. 在 `apps/backend/workflows/registry.py` 的 `WORKFLOW_RUNNERS` 增加分发：
 
 ```python
-if workflow == "flow_a":
-    return run_flow_a_workflow(job)
+WORKFLOW_RUNNERS = {
+    ...
+    "flow_a": run_flow_a_workflow,
+}
 ```
 
-3. worker 函数内更新进度、日志、结果。
+4. worker 函数内更新进度、日志、结果。
 
-4. 前端根据后端返回的 `stage`、`progress`、`logs` 展示。
+5. 前端根据后端返回的 `stage`、`progress`、`logs` 展示。
 
 ## 不要做的事
 

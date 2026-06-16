@@ -181,10 +181,10 @@ await createJob({
 后端 worker：
 
 ```text
-apps/backend/workflows/registry.py
+apps/backend/workflows/{workflow_name}/workflow.py
 ```
 
-增加 `flow_a` 分发和执行函数。
+新增对应 workflow 目录和执行类，然后在 `apps/backend/workflows/registry.py` 的 `WORKFLOW_RUNNERS` 里注册 `flow_a`。
 
 ## 错误返回约定
 

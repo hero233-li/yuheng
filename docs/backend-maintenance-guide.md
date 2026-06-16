@@ -19,7 +19,14 @@ apps/backend/
     management/commands/runworker.py
     migrations/
   workflows/
+    common.py
     registry.py
+    product_apply/
+      workflow.py
+    search_form_2/
+      workflow.py
+    reset_password/
+      workflow.py
 ```
 
 ## Django 配置
@@ -204,26 +211,66 @@ path("api/page-a/items/", core_views.page_a_items),
 }
 ```
 
-2. 在 `apps/backend/workflows/registry.py` 增加分发：
+2. 在 `apps/backend/workflows/flow_a/workflow.py` 新增流程：
 
 ```python
-def run_workflow(job):
-    workflow = job.payload.get("workflow") or "product_apply"
-    if workflow == "flow_a":
-        return run_flow_a_workflow(job)
-    ...
-```
+from workflows.common import WorkflowStep, parse_payload, run_steps
 
-3. 新增执行函数：
 
-```python
 def run_flow_a_workflow(job):
-    JobLog.objects.create(job=job, message="流程A开始")
-    ...
-    return {"ok": True}
+    workflow = FlowAWorkflow(job)
+    return run_steps(
+        job=job,
+        workflow=workflow,
+        start_message="流程A开始",
+        result_message="[写入流程A结果] 结果已保存",
+    )
 ```
 
-4. worker 会把返回值写入 `job.result`。
+3. 新增执行类：
+
+```python
+class FlowAWorkflow:
+    def __init__(self, job):
+        self.job = job
+        self.payload = parse_payload(job.payload.get("biz_payload"))
+
+    def build_steps(self):
+        return [
+            WorkflowStep("读取参数", self.load_request_context),
+            WorkflowStep("执行处理", self.execute),
+        ]
+
+    def load_request_context(self):
+        return "参数读取完成"
+
+    def execute(self):
+        return "流程A执行完成"
+
+    def build_result(self):
+        return {"ok": True}
+```
+
+4. 在 `apps/backend/workflows/flow_a/__init__.py` 导出入口：
+
+```python
+from .workflow import run_flow_a_workflow
+
+__all__ = ["run_flow_a_workflow"]
+```
+
+5. 在 `apps/backend/workflows/registry.py` 增加分发：
+
+```python
+from workflows.flow_a import run_flow_a_workflow
+
+WORKFLOW_RUNNERS = {
+    ...
+    "flow_a": run_flow_a_workflow,
+}
+```
+
+6. worker 会把返回值写入 `job.result`。
 
 ## worker
 
