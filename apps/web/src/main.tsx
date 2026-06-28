@@ -16,6 +16,7 @@ import { GroupedCardSearchPage } from './apps/web/page/GroupedCardSearchPage';
 import { SearchForm2Page } from './apps/web/page/SearchForm2Page';
 import { ResetPasswordPage } from './apps/web/page/ResetPasswordPage';
 import {RISK050009} from './apps/web/page/RISK/RISK050009'
+import BusinessPage from "./apps/web/page/Business";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const appRoutes = [
       { path: 'product-apply', element: <JobCreatePage /> },
       { path: 'search-form-2', element: <SearchForm2Page /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
+      { path: 'business-password', element: <BusinessPage /> },
       { path: 'risk-050009', element: <RISK050009 /> },
       { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
       { path: 'jobs', element: <JobListPage /> },

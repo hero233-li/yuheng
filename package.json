@@ -14,5 +14,12 @@
     "backend:web": "node scripts/backend-command.mjs runserver",
     "backend:worker": "node scripts/backend-command.mjs runworker",
     "backend:migrate": "node scripts/backend-command.mjs migrate"
+  },
+  "dependencies": {
+    "antd": "^5.29.3",
+    "axios": "^1.18.1",
+    "lucide-react": "^1.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }

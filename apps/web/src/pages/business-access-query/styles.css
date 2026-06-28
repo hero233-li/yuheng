@@ -1,0 +1,43 @@
+.portable-business-access {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.portable-business-access .ant-form-item {
+  margin-bottom: 10px;
+}
+
+.portable-business-access__actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.portable-business-access__workflow {
+  padding: 8px 2px 0;
+}
+
+.portable-business-access__workflow-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.portable-business-access__workflow-heading .ant-typography {
+  margin: 0;
+}
+
+.portable-business-access__workflow-tip {
+  margin: 14px 0 0 !important;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .portable-business-access__workflow-heading {
+    flex-direction: column;
+  }
+}

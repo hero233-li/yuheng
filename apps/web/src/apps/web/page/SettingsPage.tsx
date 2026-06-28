@@ -7,6 +7,7 @@ const menuSettings = [
   { path: '/product-apply', label: '产品申请' },
   { path: '/search-form-2', label: '数据维护' },
   { path: '/reset-password', label: '重置密码' },
+  { path: '/business-password', label: '业务' },
   { path: '/risk-050009', label: 'RISK050009' },
   { path: '/grouped-card-search', label: '核实审批' },
   { path: '/multi-task-table', label: '多维任务表格' },
