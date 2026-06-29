@@ -7,7 +7,13 @@ import type {
   BusinessAccessSearchValues,
   NotificationVersionType,
 } from './types';
+function createClientId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
 
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 export type PortableRequestConfig = AxiosRequestConfig & {
   showGlobalProgress?: boolean;
   useResponseDelay?: boolean;
@@ -56,7 +62,7 @@ function unwrap<T>(response: ApiResponse<T>, fallbackMessage: string) {
 }
 
 function workflowHeaders() {
-  const requestId = crypto.randomUUID();
+  const requestId = createClientId();
   return {
     'X-Idempotency-Key': requestId,
     'X-Trace-ID': requestId.split('-').join(''),

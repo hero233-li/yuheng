@@ -58,6 +58,7 @@ const defaultPreferences = {
     '/search-form-2': 'single' as MenuTabMode,
     '/reset-password': 'single' as MenuTabMode,
     '/business-password': 'single' as MenuTabMode,
+    '/link-password': 'single' as MenuTabMode,
     '/risk-050009': 'single' as MenuTabMode,
     '/multi-task-table': 'single' as MenuTabMode,
     '/grouped-card-search': 'single' as MenuTabMode,

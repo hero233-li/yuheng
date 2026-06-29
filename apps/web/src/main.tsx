@@ -17,6 +17,7 @@ import { SearchForm2Page } from './apps/web/page/SearchForm2Page';
 import { ResetPasswordPage } from './apps/web/page/ResetPasswordPage';
 import {RISK050009} from './apps/web/page/RISK/RISK050009'
 import BusinessPage from "./apps/web/page/Business";
+import LinkPage from "./apps/web/page/LinkPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const appRoutes = [
       { path: 'search-form-2', element: <SearchForm2Page /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'business-password', element: <BusinessPage /> },
+      { path: 'link-password', element: <LinkPage /> },
       { path: 'risk-050009', element: <RISK050009 /> },
       { path: 'jobs/new', element: <Navigate to="/product-apply" replace /> },
       { path: 'jobs', element: <JobListPage /> },

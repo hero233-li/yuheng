@@ -47,6 +47,7 @@ const menuItems: AppMenuItem[] = [
         { key: '/search-form-2', icon: <PlayCircleOutlined />, label: '数据维护' },
         { key: '/reset-password', icon: <PlayCircleOutlined />, label: '重置密码' },
         { key: '/business-password', icon: <PlayCircleOutlined />, label: '业务准入查询' },
+        { key: '/link-password', icon: <PlayCircleOutlined />, label: '申请链接' },
     ],
   },
   {
