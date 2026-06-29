@@ -9,6 +9,7 @@ const menuSettings = [
   { path: '/reset-password', label: '重置密码' },
   { path: '/business-password', label: '业务' },
   { path: '/link-password', label: '链接' },
+    { path: '/data-password', label: '数据' },
   { path: '/risk-050009', label: 'RISK050009' },
   { path: '/grouped-card-search', label: '核实审批' },
   { path: '/multi-task-table', label: '多维任务表格' },

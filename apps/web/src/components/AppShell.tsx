@@ -48,6 +48,7 @@ const menuItems: AppMenuItem[] = [
         { key: '/reset-password', icon: <PlayCircleOutlined />, label: '重置密码' },
         { key: '/business-password', icon: <PlayCircleOutlined />, label: '业务准入查询' },
         { key: '/link-password', icon: <PlayCircleOutlined />, label: '申请链接' },
+        { key: '/data-password', icon: <PlayCircleOutlined />, label: '申请链接' },
     ],
   },
   {
